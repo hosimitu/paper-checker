@@ -16,3 +16,8 @@ pending.json
 # OS
 .DS_Store
 Thumbs.db
+
+# IDEs and Workspaces
+.vscode/
+.idea/
+*.code-workspace
