@@ -1,5 +1,7 @@
-feedparser
-google-genai
-requests
-python-dotenv
 scholarly
+playwright
+playwright-stealth
+google-generativeai
+python-dotenv
+requests
+feedparser

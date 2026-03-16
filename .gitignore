@@ -21,3 +21,13 @@ Thumbs.db
 .vscode/
 .idea/
 *.code-workspace
+
+# others
+*.txt
+*.log
+
+# test files
+test_*.py
+debug_*.py
+temp_*.json
+.playwright_data/

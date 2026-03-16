@@ -7,10 +7,10 @@ class GeminiRateLimitError(Exception):
     pass
 
 class GeminiAnalyzer:
-    def __init__(self, api_key, keywords):
+    def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite-preview"):
         self.client = genai.Client(api_key=api_key)
         self.keywords = keywords
-        self.model_id = "gemini-3.1-flash-lite-preview"  # クォータ制限が最も緩い最新の軽量モデルに変更
+        self.model_id = model_id
 
     def analyze_entry(self, entry):
         prompt = f"""

@@ -16,8 +16,12 @@ def main():
     
     history_mgr = HistoryManager()
     rss_fetcher = RSSFetcher(config['rss_urls'])
-    abstract_fetcher = AbstractFetcher()
-    analyzer = GeminiAnalyzer(config['gemini_api_key'], config['keywords'])
+    abstract_fetcher = AbstractFetcher(config=config)
+    analyzer = GeminiAnalyzer(
+        config['gemini_api_key'], 
+        config['keywords'],
+        model_id=config.get('gemini_model', 'gemini-3.1-flash-lite-preview')
+    )
     notifier = Notifier(config['discord_webhook_url'])
 
     # 1. RSSから新しい記事を収穫し、pendingに追加
@@ -26,8 +30,9 @@ def main():
     for entry in latest_rss_entries:
         history_mgr.add_to_pending(entry)
     
-    # 期限切れ(30日)の整理
-    history_mgr.cleanup_expired(days=30)
+    # 期限切れの整理
+    pending_item_expire_days = config.get('pending_item_expire_days', 30)
+    history_mgr.cleanup_expired(days=pending_item_expire_days)
     history_mgr.save()
 
     # 2. 保留中の記事に対してAbstract取得とGemini評価を行う
@@ -38,33 +43,49 @@ def main():
     else:
         print(f"Step 2: 保留中の {len(pending_entries)} 件についてAbstractの取得を試みます...")
         
-        # 1回の実行での解析制限 (RPDを考慮)
-        limit = 5
+        # 1回の実行での制限
+        max_analysis_success_count = config.get('max_analysis_success_count', 5)
+        max_scholar_access_attempts = config.get('max_scholar_access_attempts', 10)
+        scholar_search_timeout_sec = config.get('scholar_search_timeout_sec', 30)
+        interval_after_success_sec = config.get('interval_after_success_sec', 10)
+        interval_after_notfound_sec = config.get('interval_after_notfound_sec', 20)
+        min_abstract_length = config.get('min_abstract_length', 50)
+        scholar_search_year_range = config.get('scholar_search_year_range', 1)
+        
         processed_count = 0
+        tried_count = 0
         
         import threading
         
         for entry in pending_entries:
-            if processed_count >= limit:
-                print(f"1回あたりの解析上限({limit}件)に達しました。残りは次回に回します。")
+            if processed_count >= max_analysis_success_count:
+                print(f"解析成功上限({max_analysis_success_count}件)に達しました。残りは次回に回します。")
+                break
+            if tried_count >= max_scholar_access_attempts:
+                print(f"試行上限({max_scholar_access_attempts}件)に達しました。Google Scholar保護のため本日のアクセスを終了します。")
                 break
                 
-            print(f"-- 処理中 ({processed_count + 1}/{limit}): {entry['title']} --")
+            tried_count += 1
+            print(f"-- 処理中 (試行:{tried_count}/{max_scholar_access_attempts}, 成功:{processed_count}/{max_analysis_success_count}): {entry['title']} --")
             
             # Google Scholar検索（タイムアウト付き）
             abstract = None
             def fetch_with_timeout():
                 nonlocal abstract
                 try:
-                    abstract = abstract_fetcher.fetch_abstract(entry['title'], source_url=entry['link'])
+                    abstract = abstract_fetcher.fetch_abstract(
+                        entry['title'], 
+                        source_url=entry['link'],
+                        year_range=scholar_search_year_range,
+                        min_abstract_len=min_abstract_length
+                    )
                 except BotDetectedError as be:
                     print(f"\n!!!! {be} !!!!")
-                    # 例外を外に伝えるためにグローバル（またはnonlocal）で保持
                     entry['bot_error'] = be
 
             fetch_thread = threading.Thread(target=fetch_with_timeout)
             fetch_thread.start()
-            fetch_thread.join(timeout=30) # 30秒待っても終わらなければCAPTCHA待ちと判断
+            fetch_thread.join(timeout=scholar_search_timeout_sec)
             
             if fetch_thread.is_alive():
                 print("\nCRITICAL: Google Scholar 応答なし（CAPTCHA待ちの可能性が高い）")
@@ -72,20 +93,20 @@ def main():
                 break
             
             if 'bot_error' in entry:
-                break # Bot検知例外が出た場合も中断
+                break
             
             if abstract:
                 print(f"Abstract取得成功: {entry['title']}")
                 processed_count += 1
                 
                 # Geminiで解析
-                entry['summary'] = abstract # RSSのメタデータではなく取得したAbstractをセット
+                entry['summary'] = abstract
                 try:
                     is_relevant, reason, jp_abstract = analyzer.analyze_entry(entry)
                 except GeminiRateLimitError as ge:
                     print(f"\n!!!! {ge} !!!!")
                     print("Geminiのクォータ上限に達しました。本日の処理を中断します。")
-                    break # ループを中断
+                    break
                 
                 if is_relevant:
                     print("関連あり！通知します。")
@@ -93,12 +114,12 @@ def main():
                 else:
                     print("関連なし。")
                 
-                # 処理完了（履歴へ移動）
                 history_mgr.mark_completed(entry['link'])
-                time.sleep(10) # APIレート制限用
+                time.sleep(interval_after_success_sec)
             else:
                 print(f"まだGoogle Scholarに未登録のようです: {entry['title']}")
-                time.sleep(20)
+                history_mgr.move_to_end(entry['link'])
+                time.sleep(interval_after_notfound_sec)
 
         history_mgr.save()
     

@@ -29,25 +29,40 @@ class HistoryManager:
     def add_to_pending(self, entry):
         """新規記事を保留キューに追加"""
         if not self.is_known(entry['link']):
-            entry['added_date'] = datetime.now().isoformat()
+            now_iso = datetime.now().isoformat()
+            entry['added_date'] = now_iso
+            entry['first_added_date'] = now_iso # 初回追加日を記録
             self.pending.append(entry)
 
     def get_pending_entries(self):
-        """保留中の記事リストを取得"""
-        return self.pending
+        """保留中の記事リストを古い順に取得"""
+        # added_date でソート（古いものから順に処理）
+        return sorted(self.pending, key=lambda x: x.get('added_date', ''))
 
     def mark_completed(self, entry_link):
         """処理完了。保留から削除し履歴に追加"""
         self.history.add(entry_link)
         self.pending = [p for p in self.pending if p['link'] != entry_link]
 
+    def move_to_end(self, entry_link):
+        """Google Scholarで見つからなかった場合などに、キューの最後に回す"""
+        for p in self.pending:
+            if p['link'] == entry_link:
+                p['added_date'] = datetime.now().isoformat()
+                break
+
     def cleanup_expired(self, days=30):
         """期限切れ（30日以上）の保留記事を削除して履歴へ（二度と拾わない）"""
         now = datetime.now()
         new_pending = []
         for p in self.pending:
-            added_date = datetime.fromisoformat(p.get('added_date'))
-            if now - added_date < timedelta(days=days):
+            # first_added_date がない場合は added_date を使用（移行用）
+            base_date_str = p.get('first_added_date') or p.get('added_date')
+            if not base_date_str:
+                continue
+                
+            base_date = datetime.fromisoformat(base_date_str)
+            if now - base_date < timedelta(days=days):
                 new_pending.append(p)
             else:
                 print(f"期限切れのため破棄します: {p['title']}")
