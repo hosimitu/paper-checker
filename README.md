@@ -100,14 +100,16 @@ Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once
 
 *   `main.py`: Main processing program.
 *   `rss_fetcher.py`: Module to fetch article titles and links from RSS feeds.
-*   `abstract_fetcher.py`: Module to fetch abstracts from Google Scholar using `scholarly`.
-*   `gemini_analyzer.py`: Module to determine relevance using the Gemini API.
-*   `history_manager.py`: Module to manage processed (`history.json`) and pending (`pending.json`) data.
-*   `notifier.py`: Module to send notifications to a Discord Webhook.
+*   `abstract_fetcher.py`: Module to fetch abstracts from Google Scholar.
+*   `gemini_analyzer.py`: Module to determine relevance using the Gemini API and generate Japanese summaries.
+*   `history_manager.py`: Module to manage processing history and pending data (SQLite).
+*   `notifier.py`: Module to send rich notifications to a Discord Webhook.
 *   `run_checker.bat`: Batch file for execution.
 *   `config.json`: (User-created) Configuration file for API keys and keywords.
+*   `history.db`: (Auto-generated) SQLite database to store processed and pending data.
 
 ## Notes
 *   The system is designed with Gemini API and Google Scholar rate limits in mind. If Google Scholar blocks the access, a browser window will automatically appear; please solve the CAPTCHA to resume processing.
 *   Once a CAPTCHA is solved, the session information is saved in the specified directory (default: `.playwright_data`) to prevent frequent CAPTCHA requests in future runs.
-*   Sensitive information and local data such as `config.json`, `history.json`, `pending.json`, and `.env` are automatically excluded from Git tracking (refer to `.gitignore`).
+*   Sensitive information and local data such as `config.json`, `history.db`, and `.env` are automatically excluded from Git tracking (refer to `.gitignore`).
+*   If existing `history.json` or `pending.json` files are present, they will be automatically migrated to `history.db` on the first run, and the original files will be renamed to `.bak` as a backup.

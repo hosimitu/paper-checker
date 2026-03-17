@@ -101,14 +101,16 @@ Windowsの「タスク スケジューラ」などを利用して、`run_checker
 
 *   `main.py`: メイン処理プログラム
 *   `rss_fetcher.py`: RSSから記事のタイトルとリンクを取得するモジュール
-*   `abstract_fetcher.py`: `scholarly` を利用してGoogle Scholarから要旨(Abstract)を取得するモジュール
+*   `abstract_fetcher.py`: Google Scholarから要旨(Abstract)を取得するモジュール
 *   `gemini_analyzer.py`: Gemini APIを利用して関連性を判定・日本語訳を生成するモジュール
-*   `history_manager.py`: 処理済み(`history.json`)や保留中(`pending.json`)のデータを管理するモジュール
+*   `history_manager.py`: 処理履歴や保留中のデータを管理するモジュール (SQLite)
 *   `notifier.py`: Discordへリッチな通知を送信するモジュール
 *   `run_checker.bat`: 実行用のバッチファイル
 *   `config.json`: (ユーザー作成) APIキーやキーワードの設定ファイル
+*   `history.db`: (自動生成) 処理済みデータや保留データを保存するSQLiteデータベース
 
 ## 注意事項
 *   Gemini APIおよびGoogle Scholarのレート制限に配慮した設計になっています。もしGoogle Scholarでブロックされた場合は、自動でブラウザが立ち上がりますのでメッセージに従ってキャプチャを解除してください。
 *   一度キャプチャを解除すれば、設定したディレクトリ（デフォルト `.playwright_data`）にセッション情報が保存され、次回以降のキャプチャ要求が抑制されます。
-*   `config.json`, `history.json`, `pending.json`, `.env` などの機密情報やローカルデータは自動的にGitの管理から除外 (`.gitignore` 参照) されます。
+*   `config.json`, `history.db`, `.env` などの機密情報やローカルデータは自動的にGitの管理から除外 (`.gitignore` 参照) されます。
+*   既存の `history.json` や `pending.json` がある場合、初回実行時に自動的に `history.db` への移行が行われ、元のファイルは `.bak` としてバックアップされます。

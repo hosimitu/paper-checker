@@ -114,13 +114,22 @@ def main():
                 else:
                     print("関連なし。")
                 
-                history_mgr.mark_completed(entry['link'])
+                # 関連性に関わらず、解析済みの詳細情報を保存して完了とする
+                history_mgr.mark_completed(
+                    entry['link'],
+                    title=entry['title'],
+                    abstract=abstract,
+                    is_relevant=is_relevant,
+                    reason=reason,
+                    jp_abstract=jp_abstract
+                )
                 time.sleep(interval_after_success_sec)
             else:
                 print(f"まだGoogle Scholarに未登録のようです: {entry['title']}")
                 history_mgr.move_to_end(entry['link'])
                 time.sleep(interval_after_notfound_sec)
 
+        # SQLite版では個別のsave()は不要だが、インターフェース維持のため呼び出しは残す（中身はpass）
         history_mgr.save()
     
     print("すべての処理が完了しました。")

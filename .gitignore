@@ -12,6 +12,11 @@ config.json
 history.json
 pending.json
 .env
+history.db
+*.bak
+*.db-journal
+*.db-wal
+*.db-shm
 
 # OS
 .DS_Store
