@@ -1,7 +1,7 @@
 scholarly
 playwright
 playwright-stealth
-google-generativeai
-python-dotenv
+google-genai
 requests
 feedparser
+pyinstaller

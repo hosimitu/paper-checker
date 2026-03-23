@@ -13,11 +13,14 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
 
 ## Key Features
 
+*   **GUI Configuration Editor**: Use `config_editor.py` (or the built executable) to easily set up API keys, keywords, and other settings via an intuitive interface without manual JSON editing.
+*   **Executable (EXE) Build Support**: Bundled `build_exe.py` script allows you to create standalone executables for distribution to users without a Python environment.
 *   **Delayed Evaluation Architecture**: Newly fetched papers from RSS are kept in a "Pending" state until they are indexed in Google Scholar. Once the abstract becomes available, a high-precision evaluation is performed.
 *   **High-Precision Evaluation via Gemini**: Both the title and abstract are passed to Gemini, which interprets the context rather than relying on simple keyword matching to determine relevance.
+*   **Discord Embed Notifications**: Supports rich notifications using Discord's "Embed" format. Long content is also split for better readability.
+*   **Duplicate Prevention**: Papers that have already been processed (either notified or deemed irrelevant) are recorded and will not be processed again.
 *   **Fail-safe and Automatic Intervention**: Includes logic to avoid Google Scholar bot detection. If blocked, it automatically displays a browser for the user to manually solve the CAPTCHA and continue.
 *   **Session Persistence**: Saves and reuses the solved CAPTCHA state to project directory, ensuring fewer interruptions and smoother operation.
-*   **Duplicate Prevention**: Papers that have already been processed (either notified or deemed irrelevant) are recorded and will not be processed again.
 
 ## Requirements
 
@@ -36,7 +39,14 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
     ```
 
 3.  **Prepare Configuration File**
-    Create a `config.json` file and enter your settings as follows. (Note: Since it is listed in `.gitignore`, it will not be committed to Git. If it doesn't exist, create it manually.)
+    Prepare the `config.json` file. The easiest way is to use the dedicated GUI tool:
+
+    ```bash
+    python config_editor.py
+    ```
+    Follow the instructions on the screen to enter your API key, Webhook URL, keywords, etc., then click "Save" to automatically generate `config.json`.
+
+    (If you prefer manual creation, refer to the template below.)
 
     ```json
     {
@@ -83,6 +93,13 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
 
 ## Usage
 
+**Configuration**
+To create or update your settings, launch the config editor:
+```bash
+python config_editor.py
+```
+
+**Run Paper Check**
 Execute the following command or batch file.
 
 ```bash
@@ -93,19 +110,28 @@ or
 run_checker.bat
 ```
 
+**Build Executable (EXE)**
+To create standalone executables for distribution (useful for Windows users without Python):
+```bash
+python build_exe.py
+```
+After building, the executables will be generated in the `dist/ronbun_checker/` folder.
+
 **Operation Recommendation:**
 Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once a day.
 
 ## File Structure
 
 *   `main.py`: Main processing program.
+*   `config_editor.py`: GUI tool to easily create and edit the configuration file (`config.json`).
+*   `build_exe.py`: Automation script to build standalone executables (EXE) for the project.
 *   `rss_fetcher.py`: Module to fetch article titles and links from RSS feeds.
 *   `abstract_fetcher.py`: Module to fetch abstracts from Google Scholar.
-*   `gemini_analyzer.py`: Module to determine relevance using the Gemini API and generate Japanese summaries.
+*   `gemini_analyzer.py`: Module to determine relevance using the Gemini API and generate summaries.
 *   `history_manager.py`: Module to manage processing history and pending data (SQLite).
 *   `notifier.py`: Module to send rich notifications to a Discord Webhook.
 *   `run_checker.bat`: Batch file for execution.
-*   `config.json`: (User-created) Configuration file for API keys and keywords.
+*   `config.json`: (User-created/Auto-generated) Configuration file for API keys and keywords.
 *   `history.db`: (Auto-generated) SQLite database to store processed and pending data.
 
 ## Notes

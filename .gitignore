@@ -36,3 +36,25 @@ test_*.py
 debug_*.py
 temp_*.json
 .playwright_data/
+
+# PyInstaller / Build
+build/
+dist/
+*.spec
+
+# Playwrightブラウザ本体
+playwright_browsers/
+
+# Python extras
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.tox/
+.python-version
+
+# Temporary files
+*.tmp
+*~
+*.bak
+*.swp
