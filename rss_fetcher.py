@@ -15,10 +15,13 @@ class RSSFetcher:
                     continue
                 
                 # タイトルのクリーンアップ（HTMLタグ除去 + Unicode正規化）
-                title = entry.title
+                title = entry.title if hasattr(entry, 'title') and entry.title else ''
                 title = re.sub(r'<[^>]+>', '', title)
                 title = unicodedata.normalize('NFKC', title)
                 title = re.sub(r'\s+', ' ', title).strip()
+
+                if not title:
+                    continue
 
                 new_entries.append({
                         'title': title,

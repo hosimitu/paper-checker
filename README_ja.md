@@ -125,11 +125,13 @@ Windowsの「タスク スケジューラ」などを利用して、`run_checker
 *   `main.py`: メイン処理プログラム
 *   `config_editor.py`: 設定ファイル(`config.json`)をGUIで簡単に編集・作成するためのツール
 *   `build_exe.py`: プログラムを実行ファイル化(EXE)するためのビルド自動化スクリプト
+*   `playwright_fix_hook.py`: 実行ファイル(EXE)化の際にPlaywrightを正しく動作させるためのフックスクリプト
 *   `rss_fetcher.py`: RSSから記事のタイトルとリンクを取得するモジュール
 *   `abstract_fetcher.py`: Google Scholarから要旨(Abstract)を取得するモジュール
 *   `gemini_analyzer.py`: Gemini APIを利用して関連性を判定・日本語訳を生成するモジュール
 *   `history_manager.py`: 処理履歴や保留中のデータを管理するモジュール (SQLite)
 *   `notifier.py`: Discordへリッチな通知を送信するモジュール
+*   `check_db.py` / `fix_db.py`: (オプション) データベースの不整合を確認・修正するためのメンテナンス用スクリプト
 *   `run_checker.bat`: 実行用のバッチファイル
 *   `config.json`: (ユーザー作成/ツール内生成) APIキーやキーワードの設定ファイル
 *   `history.db`: (自動生成) 処理済みデータや保留データを保存するSQLiteデータベース

@@ -1,9 +1,14 @@
 from google import genai
 from google.genai import types
 import json
+import time
 
 class GeminiRateLimitError(Exception):
     """Gemini APIのレート制限（429等）を検知した際の例外"""
+    pass
+
+class GeminiUnavailableError(Exception):
+    """Gemini APIの503エラー（一時不可）を検知した際の例外"""
     pass
 
 class GeminiAnalyzer:
@@ -62,26 +67,41 @@ JSONのみを出力してください。
 """
             abstract_key = "japanese_abstract"
             default_reason = "判定理由なし"
-        try:
-            response = self.client.models.generate_content(
-                model=self.model_id,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model_id,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json"
+                    )
                 )
-            )
-            result = json.loads(response.text)
-            return (
-                result.get("is_relevant", False), 
-                result.get("reason", default_reason),
-                result.get(abstract_key, "")
-            )
-        except Exception as e:
-            error_msg = str(e)
-            # レート制限 (429 Too Many Requests や Resource Exhausted) をチェック
-            if "429" in error_msg or "ResourceExhausted" in error_msg or "quota" in error_msg.lower():
-                print(f"CRITICAL: Gemini API Rate Limit exceeded! ({error_msg})")
-                raise GeminiRateLimitError(f"Gemini quota exceeded: {error_msg}")
+                result = json.loads(response.text)
+                return (
+                    result.get("is_relevant", False), 
+                    result.get("reason", default_reason),
+                    result.get(abstract_key, "")
+                )
+            except Exception as e:
+                error_msg = str(e)
+                # 503エラー (UNAVAILABLE) かどうかチェック
+                is_unavailable = "503" in error_msg or "UNAVAILABLE" in error_msg
                 
-            print(f"Gemini解析中にエラーが発生しました: {e}")
-            return False, f"解析エラー: {e}", ""
+                if is_unavailable and attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 5
+                    print(f"Gemini API 503 UNAVAILABLE! {wait_time}秒後にリトライします... (Attempt {attempt+1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                
+                # レート制限 (429等) をチェック
+                if "429" in error_msg or "ResourceExhausted" in error_msg or "quota" in error_msg.lower():
+                    print(f"CRITICAL: Gemini API Rate Limit exceeded! ({error_msg})")
+                    raise GeminiRateLimitError(f"Gemini quota exceeded: {error_msg}")
+                    
+                # 503がリトライ後も続く場合
+                if is_unavailable:
+                    raise GeminiUnavailableError(f"Gemini remains unavailable after {max_retries} attempts: {error_msg}")
+
+                print(f"Gemini解析中にエラーが発生しました: {e}")
+                return False, f"解析エラー: {e}", ""

@@ -29,6 +29,7 @@ Thumbs.db
 
 # others
 *.txt
+!requirements.txt
 *.log
 
 # test files
@@ -56,5 +57,8 @@ htmlcov/
 # Temporary files
 *.tmp
 *~
-*.bak
 *.swp
+memo.md
+.python-version
+.history/
+build_log.txt

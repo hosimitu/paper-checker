@@ -16,7 +16,7 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
 *   **GUI Configuration Editor**: Use `config_editor.py` (or the built executable) to easily set up API keys, keywords, and other settings via an intuitive interface without manual JSON editing.
 *   **Executable (EXE) Build Support**: Bundled `build_exe.py` script allows you to create standalone executables for distribution to users without a Python environment.
 *   **Delayed Evaluation Architecture**: Newly fetched papers from RSS are kept in a "Pending" state until they are indexed in Google Scholar. Once the abstract becomes available, a high-precision evaluation is performed.
-*   **High-Precision Evaluation via Gemini**: Both the title and abstract are passed to Gemini, which interprets the context rather than relying on simple keyword matching to determine relevance.
+*   **High-Precision Evaluation via Gemini**: Both the title and abstract are passed to Gemini, which interprets the context rather than relying on simple keyword matching to determine relevance. It also simultaneously generates a Japanese summary of the relevant papers.
 *   **Discord Embed Notifications**: Supports rich notifications using Discord's "Embed" format. Long content is also split for better readability.
 *   **Duplicate Prevention**: Papers that have already been processed (either notified or deemed irrelevant) are recorded and will not be processed again.
 *   **Fail-safe and Automatic Intervention**: Includes logic to avoid Google Scholar bot detection. If blocked, it automatically displays a browser for the user to manually solve the CAPTCHA and continue.
@@ -115,7 +115,7 @@ To create standalone executables for distribution (useful for Windows users with
 ```bash
 python build_exe.py
 ```
-After building, the executables will be generated in the `dist/ronbun_checker/` folder.
+After building, the executables for the main program and the config editor will be generated in the `dist/ronbun_checker/` folder.
 
 **Operation Recommendation:**
 Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once a day.
@@ -125,11 +125,13 @@ Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once
 *   `main.py`: Main processing program.
 *   `config_editor.py`: GUI tool to easily create and edit the configuration file (`config.json`).
 *   `build_exe.py`: Automation script to build standalone executables (EXE) for the project.
+*   `playwright_fix_hook.py`: Hook script to ensure Playwright works correctly when building the executable (EXE).
 *   `rss_fetcher.py`: Module to fetch article titles and links from RSS feeds.
 *   `abstract_fetcher.py`: Module to fetch abstracts from Google Scholar.
 *   `gemini_analyzer.py`: Module to determine relevance using the Gemini API and generate summaries.
 *   `history_manager.py`: Module to manage processing history and pending data (SQLite).
 *   `notifier.py`: Module to send rich notifications to a Discord Webhook.
+*   `check_db.py` / `fix_db.py`: (Optional) Maintenance scripts to verify and fix database inconsistencies.
 *   `run_checker.bat`: Batch file for execution.
 *   `config.json`: (User-created/Auto-generated) Configuration file for API keys and keywords.
 *   `history.db`: (Auto-generated) SQLite database to store processed and pending data.

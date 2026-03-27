@@ -21,7 +21,7 @@ if os.path.exists(_pw_browsers_path):
 from history_manager import HistoryManager
 from rss_fetcher import RSSFetcher
 from abstract_fetcher import AbstractFetcher, BotDetectedError
-from gemini_analyzer import GeminiAnalyzer, GeminiRateLimitError
+from gemini_analyzer import GeminiAnalyzer, GeminiRateLimitError, GeminiUnavailableError
 from notifier import Notifier
 
 def load_config(config_file):
@@ -157,6 +157,12 @@ def main():
             tried_count += 1
             print(m['processing'].format(tried_count, max_scholar_access_attempts, processed_count, max_analysis_success_count, entry['title']))
             
+            # ガード: タイトルがない場合は Scholar 検索を行わず整理してスキップ
+            if not entry.get('title'):
+                print("警告: タイトルが欠損しているため、この記事を完了（破棄）扱いとしてスキップします。")
+                history_mgr.mark_completed(entry['link'], title="[Invalid Title]", is_relevant=False, reason="Title missing")
+                continue
+
             # Google Scholar検索（タイムアウト付き）
             abstract = None
             def fetch_with_timeout():
@@ -194,6 +200,11 @@ def main():
                 except GeminiRateLimitError as ge:
                     print(m['gemini_limit'].format(ge))
                     break
+                except GeminiUnavailableError as ue:
+                    print(f"\n!!!! {ue} !!!!")
+                    print("一時的なエラーのため、この記事の解析は次回に回します。")
+                    history_mgr.move_to_end(entry['link'])
+                    continue
                 
                 if is_relevant:
                     print(m['relevant'])

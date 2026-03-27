@@ -59,8 +59,15 @@ def _run_playwright_headless(url, data_dir, result_queue):
                     if title_elem.count() > 0:
                         res_title = title_elem.inner_text()
                         res_url = title_elem.get_attribute("href")
-                        snippet_elem = first_result.locator(".gs_rs")
-                        res_abstract = snippet_elem.inner_text() if snippet_elem.count() > 0 else ""
+
+                        # フルテキストが格納されているコンテナ (.gs_fma_snp) があれば優先して取得する
+                        full_abs_elem = first_result.locator(".gs_fma_snp")
+                        if full_abs_elem.count() > 0:
+                            res_abstract = full_abs_elem.inner_text()
+                        else:
+                            snippet_elem = first_result.locator(".gs_rs")
+                            res_abstract = snippet_elem.inner_text() if snippet_elem.count() > 0 else ""
+                            
                         result_queue.put(('ok', {
                             'bib': {'title': res_title, 'abstract': res_abstract},
                             'pub_url': res_url or ""
@@ -71,9 +78,17 @@ def _run_playwright_headless(url, data_dir, result_queue):
                     result_queue.put(('ok', None))
 
             except Exception as e:
-                result_queue.put(('error', str(e)))
+                # ブラウザがクラッシュしていたり、閉じられている場合のエラーを検知
+                error_str = str(e)
+                if "Target page, context or browser has been closed" in error_str:
+                    result_queue.put(('error', "Playwright browser crashed or closed unexpectedly."))
+                else:
+                    result_queue.put(('error', error_str))
             finally:
-                context.close()
+                try:
+                    context.close()
+                except:
+                    pass
 
     except Exception as e:
         result_queue.put(('error', str(e)))
@@ -91,39 +106,54 @@ def _run_playwright_headful(url, data_dir, result_queue, timeout_sec):
                 data_dir,
                 headless=False
             )
-            page = context.pages[0] if context.pages else context.new_page()
-            Stealth().apply_stealth_sync(page)
-            page.goto(url)
+            try:
+                page = context.pages[0] if context.pages else context.new_page()
+                Stealth().apply_stealth_sync(page)
+                page.goto(url)
 
-            start_time = time.time()
-            result_found = None
+                start_time = time.time()
+                result_found = None
 
-            while time.time() - start_time < timeout_sec:
+                while time.time() - start_time < timeout_sec:
+                    try:
+                        if page.locator(".gs_ri").count() > 0:
+                            print("\n[+] ブロックが解除されたことを確認しました。")
+                            first_result = page.locator(".gs_ri").first
+                            title_elem = first_result.locator(".gs_rt a")
+                            
+                            if title_elem.count() > 0:
+                                res_title = title_elem.inner_text()
+                                res_url = title_elem.get_attribute("href")
+
+                                # フルテキストが格納されているコンテナ (.gs_fma_snp) があれば優先して取得する
+                                full_abs_elem = first_result.locator(".gs_fma_snp")
+                                if full_abs_elem.count() > 0:
+                                    res_abstract = full_abs_elem.inner_text()
+                                else:
+                                    snippet_elem = first_result.locator(".gs_rs")
+                                    res_abstract = snippet_elem.inner_text() if snippet_elem.count() > 0 else ""
+                                    
+                                result_found = {
+                                    'bib': {'title': res_title, 'abstract': res_abstract},
+                                    'pub_url': res_url or ""
+                                }
+                            break
+                    except:
+                        pass
+                    time.sleep(2)
+
+                if result_found:
+                    result_queue.put(('ok', result_found))
+                else:
+                    result_queue.put(('timeout', None))
+
+            except Exception as e:
+                result_queue.put(('error', str(e)))
+            finally:
                 try:
-                    if page.locator(".gs_ri").count() > 0:
-                        print("\n[+] ブロックが解除されたことを確認しました。")
-                        first_result = page.locator(".gs_ri").first
-                        title_elem = first_result.locator(".gs_rt a")
-                        if title_elem.count() > 0:
-                            res_title = title_elem.inner_text()
-                            res_url = title_elem.get_attribute("href")
-                            snippet_elem = first_result.locator(".gs_rs")
-                            res_abstract = snippet_elem.inner_text() if snippet_elem.count() > 0 else ""
-                            result_found = {
-                                'bib': {'title': res_title, 'abstract': res_abstract},
-                                'pub_url': res_url or ""
-                            }
-                        break
+                    context.close()
                 except:
                     pass
-                time.sleep(2)
-
-            context.close()
-
-            if result_found:
-                result_queue.put(('ok', result_found))
-            else:
-                result_queue.put(('timeout', None))
 
     except Exception as e:
         result_queue.put(('error', str(e)))
@@ -212,6 +242,10 @@ class AbstractFetcher:
         Google Scholarでタイトルを検索し、Abstract取得を試みる。
         """
         clean_title = self._clean_title(title)
+        if not clean_title:
+            print("タイトルが空のため、取得をスキップします。")
+            return None
+
         current_year = datetime.datetime.now().year
         year_low = current_year - year_range
         query = clean_title
