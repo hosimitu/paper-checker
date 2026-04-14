@@ -2,6 +2,7 @@ from google import genai
 from google.genai import types
 import json
 import time
+from i18n import I18n
 
 class GeminiRateLimitError(Exception):
     """Gemini APIのレート制限（429等）を検知した際の例外"""
@@ -11,62 +12,49 @@ class GeminiUnavailableError(Exception):
     """Gemini APIの503エラー（一時不可）を検知した際の例外"""
     pass
 
+class GeminiNotFoundError(Exception):
+    """Gemini APIの404エラー（モデルなし等）を検知した際の例外"""
+    pass
+
+class GeminiAnalysisError(Exception):
+    """Gemini APIの解析中（パース等）に発生した一般的な例外"""
+    pass
+
 class GeminiAnalyzer:
     def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite-preview", language="ja"):
         self.client = genai.Client(api_key=api_key)
         self.keywords = keywords
         self.model_id = model_id
-        self.language = language
+        self.i18n = I18n(language)
 
     def analyze_entry(self, entry):
-        if self.language == "en":
-            prompt = f"""
-You are an expert in determining the relevance of research papers.
-Read the title and abstract of the following paper and determine if it is relevant to the user's interests (keywords).
+        # 推論は常に英語で行い、出力言語のみlanguage設定で切り替える
+        output_instruction = self.i18n.t("gemini.output_instruction")
+        abstract_key       = self.i18n.t("gemini.abstract_key")
+        default_reason     = self.i18n.t("gemini.default_reason")
 
-【User's Interests (Keywords)】
+        prompt = f"""
+You are an expert academic reviewer specializing in evaluating the relevance of research papers.
+Read the title and abstract of the following paper and determine whether it is relevant to the user's research interests.
+
+[User's Research Interests (Keywords)]
 {', '.join(self.keywords)}
 
-【Paper Information】
+[Paper Information]
 Title: {entry['title']}
 Abstract: {entry['summary']}
 
-【Decision Rules】
-1. Determine "is_relevant" as true only if the title or abstract is directly or strongly related to the user's interests.
-2. Return the decision results in JSON format.
-    - "is_relevant": true or false
-    - "reason": A concise reason for the decision in English (if relevant, include which keyword it relates to)
-    - "translated_abstract": An accurate English summary of the paper's abstract (must be provided regardless of relevance)
+[Evaluation Rules]
+1. Mark "is_relevant" as true ONLY if the paper is directly or strongly related to the user's interests.
+   - Consider not just keyword matching, but the underlying logic, novelty, and research context.
+   - A paper using similar methods but addressing an unrelated domain should be marked false.
+2. Return the result in JSON format with the following fields:
+   - "is_relevant": true or false
+   {output_instruction}
 
-【Output Format】
-Output JSON only.
+[Output Format]
+Output JSON only. Do not include any explanation outside the JSON.
 """
-            abstract_key = "translated_abstract"
-            default_reason = "No reason provided"
-        else: # ja
-            prompt = f"""
-あなたは論文の関連性を判定する専門家です。
-以下の論文のタイトルと要旨を読み、ユーザーの関心事（キーワード）に関連があるかどうかを判定してください。
-
-【ユーザーの関心事（キーワード）】
-{', '.join(self.keywords)}
-
-【論文情報】
-タイトル: {entry['title']}
-要旨: {entry['summary']}
-
-【判定ルール】
-1. タイトルまたは要旨から、ユーザーの関心事に直接的または強く関連する場合のみ「関連あり」と判定してください。
-2. 判定結果はJSON形式で返してください。
-    - "is_relevant": true または false
-    - "reason": 簡潔な日本語の判定理由（関連がある場合はどのキーワードに関連するかを含める）
-    - "japanese_abstract": 論文の要旨の正確な日本語訳（関連性の有無に関わらず、必ず記述してください）
-
-【出力形式】
-JSONのみを出力してください。
-"""
-            abstract_key = "japanese_abstract"
-            default_reason = "判定理由なし"
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -78,8 +66,16 @@ JSONのみを出力してください。
                     )
                 )
                 result = json.loads(response.text)
+
+                # gemma-4-31b-it 等のモデルがリスト形式 [...] で返してくる場合への対応
+                if isinstance(result, list):
+                    result = result[0] if result else {}
+
+                if not isinstance(result, dict):
+                    result = {}
+
                 return (
-                    result.get("is_relevant", False), 
+                    result.get("is_relevant", False),
                     result.get("reason", default_reason),
                     result.get(abstract_key, "")
                 )
@@ -87,21 +83,31 @@ JSONのみを出力してください。
                 error_msg = str(e)
                 # 503エラー (UNAVAILABLE) かどうかチェック
                 is_unavailable = "503" in error_msg or "UNAVAILABLE" in error_msg
-                
+
                 if is_unavailable and attempt < max_retries - 1:
                     wait_time = (attempt + 1) * 5
                     print(f"Gemini API 503 UNAVAILABLE! {wait_time}秒後にリトライします... (Attempt {attempt+1}/{max_retries})")
                     time.sleep(wait_time)
                     continue
-                
+
                 # レート制限 (429等) をチェック
                 if "429" in error_msg or "ResourceExhausted" in error_msg or "quota" in error_msg.lower():
                     print(f"CRITICAL: Gemini API Rate Limit exceeded! ({error_msg})")
                     raise GeminiRateLimitError(f"Gemini quota exceeded: {error_msg}")
-                    
+
+                # 404 (モデルが見つからない等) をチェック
+                if "404" in error_msg or "not found" in error_msg.lower():
+                    raise GeminiNotFoundError(self.i18n.t("gemini.error_not_found", error=error_msg))
+
                 # 503がリトライ後も続く場合
                 if is_unavailable:
                     raise GeminiUnavailableError(f"Gemini remains unavailable after {max_retries} attempts: {error_msg}")
 
-                print(f"Gemini解析中にエラーが発生しました: {e}")
-                return False, f"解析エラー: {e}", ""
+                print(self.i18n.t("gemini.error_analyze", error=e))
+                # デバッグ用にレスポンスの生データを出力する（JSON形式が想定と異なる場合の調査用）
+                try:
+                    if 'response' in locals() and hasattr(response, 'text'):
+                        print(f"--- Debug: Raw Gemini Response ---\n{response.text}\n----------------------------------")
+                except:
+                    pass
+                raise GeminiAnalysisError(str(e))

@@ -112,14 +112,20 @@ class HistoryManager:
             """, (title, abstract, is_relevant, reason, jp_abstract, now_iso, entry_link))
             conn.commit()
 
-    def move_to_end(self, entry_link):
-        """キューの最後に回す"""
+    def move_to_end(self, entry_link, abstract=None):
+        """キューの最後に回す。要旨が提供された場合は保存する。"""
         now_iso = datetime.now().isoformat()
         with self._get_connection() as conn:
-            conn.execute(
-                "UPDATE articles SET added_date = ? WHERE link = ?",
-                (now_iso, entry_link)
-            )
+            if abstract:
+                conn.execute(
+                    "UPDATE articles SET added_date = ?, abstract = ? WHERE link = ?",
+                    (now_iso, abstract, entry_link)
+                )
+            else:
+                conn.execute(
+                    "UPDATE articles SET added_date = ? WHERE link = ?",
+                    (now_iso, entry_link)
+                )
             conn.commit()
 
     def cleanup_expired(self, days=30):

@@ -21,6 +21,7 @@
 *   **重複防止**: 一度処理した（通知した、または関連なしと判定した）論文は記録され、二度と処理されません。
 *   **フェイルセーフと自動介入**: Google ScholarのBot検知を回避するロジックを搭載。万が一ブロックされた場合でも、自動的にブラウザを表示してユーザーが手動でキャプチャを解除し、処理を続行することが可能です。
 *   **セッションの永続化**: 一度キャプチャを解除した状態を保存・再利用するため、頻繁に介入を求められることなくスムーズに動作します。
+*   **多言語対応 (i18n)**: インターフェースや通知メッセージの日本語・英語切り替えに対応しています。
 
 ## 必須要件
 
@@ -66,7 +67,8 @@
         "interval_after_notfound_sec": 20,
         "pending_item_expire_days": 30,
         "min_abstract_length": 50,
-        "scholar_search_year_range": 1
+        "scholar_search_year_range": 1,
+        "language": "ja"
     }
     ```
 
@@ -90,6 +92,7 @@
     | `pending_item_expire_days`    | 記事が保留されてから自動破棄（未処理として処理済みへ）するまでの日数 | `30`                            |
     | `min_abstract_length`         | 解析を試みる最低限の要旨(Abstract)文字数                             | `50`                            |
     | `scholar_search_year_range`   | Scholar検索で対象とする「現在から遡る年数」                          | `1`                             |
+    | `language`                    | 表示言語 (`ja` または `en`)                                          | `ja`                            |
 
 ## 使い方
 
@@ -131,6 +134,8 @@ Windowsの「タスク スケジューラ」などを利用して、`run_checker
 *   `gemini_analyzer.py`: Gemini APIを利用して関連性を判定・日本語訳を生成するモジュール
 *   `history_manager.py`: 処理履歴や保留中のデータを管理するモジュール (SQLite)
 *   `notifier.py`: Discordへリッチな通知を送信するモジュール
+*   `i18n.py`: システムの国際化（多言語表示）を制御するモジュール
+*   `locales/`: 翻訳データ（JSON形式）を格納するディレクトリ
 *   `check_db.py` / `fix_db.py`: (オプション) データベースの不整合を確認・修正するためのメンテナンス用スクリプト
 *   `run_checker.bat`: 実行用のバッチファイル
 *   `config.json`: (ユーザー作成/ツール内生成) APIキーやキーワードの設定ファイル

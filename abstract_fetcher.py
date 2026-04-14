@@ -16,6 +16,12 @@ class ManualInterventionRequired(Exception):
     """手動でのキャプチャ解除が必要な際の例外"""
     pass
 
+class CaptchaDetectedError(Exception):
+    """CAPTCHA検知を即座に呼び出し元へ通知するための例外。URLを保持する。"""
+    def __init__(self, url: str):
+        super().__init__(f"CAPTCHA detected at: {url}")
+        self.url = url
+
 def _run_playwright_headless(url, data_dir, result_queue):
     """
     別スレッドでPlaywright Sync APIを実行する。
@@ -113,11 +119,12 @@ def _run_playwright_headful(url, data_dir, result_queue, timeout_sec):
 
                 start_time = time.time()
                 result_found = None
+                is_timeout = True
 
                 while time.time() - start_time < timeout_sec:
                     try:
                         if page.locator(".gs_ri").count() > 0:
-                            print("\n[+] ブロックが解除されたことを確認しました。")
+                            print("\n[+] ブロックが解除されたことを確認しました。(検索結果あり)")
                             first_result = page.locator(".gs_ri").first
                             title_elem = first_result.locator(".gs_rt a")
                             
@@ -137,15 +144,39 @@ def _run_playwright_headful(url, data_dir, result_queue, timeout_sec):
                                     'bib': {'title': res_title, 'abstract': res_abstract},
                                     'pub_url': res_url or ""
                                 }
+                            is_timeout = False
                             break
+                        
+                        # CAPTCHA画面かどうか（CAPTCHAが存在するか）を判定する
+                        content = page.content()
+                        is_captcha = "gs_captcha_cb" in content or "recaptcha" in content.lower() or page.locator("#gs_captcha_ccl").is_visible()
+                        
+                        if not is_captcha:
+                            # CAPTCHAの要素が見当たらない場合、ユーザーが解除したか別のエラーページに遷移した可能性がある
+                            # ページ遷移のラグを考慮して2秒待機
+                            page.wait_for_timeout(2000)
+                            
+                            # もう一度現在のページ状態を取得して確認
+                            content = page.content()
+                            is_captcha_again = "gs_captcha_cb" in content or "recaptcha" in content.lower() or page.locator("#gs_captcha_ccl").is_visible()
+                            
+                            if not is_captcha_again:
+                                if page.locator(".gs_ri").count() > 0:
+                                    # 結果が遅れて表示された場合は次のループに任せる
+                                    continue
+                                else:
+                                    print("\n[+] ブロックが解除されました。しかし、該当する検索結果は見つかりませんでした。")
+                                    result_found = None
+                                    is_timeout = False
+                                    break
                     except:
                         pass
                     time.sleep(2)
 
-                if result_found:
-                    result_queue.put(('ok', result_found))
-                else:
+                if is_timeout:
                     result_queue.put(('timeout', None))
+                else:
+                    result_queue.put(('ok', result_found))
 
             except Exception as e:
                 result_queue.put(('error', str(e)))
@@ -194,19 +225,19 @@ class AbstractFetcher:
         t.join(timeout=40)
 
         if t.is_alive():
-            print("\n[!] Playwright headless timed out. Trying headful mode.")
-            return self._handle_manual_captcha(url)
+            print("\n[!] Playwright headless timed out.")
+            raise CaptchaDetectedError(url)
 
         status, data = result_queue.get()
 
         if status == 'captcha':
-            return self._handle_manual_captcha(data)
+            raise CaptchaDetectedError(data)
         elif status == 'ok':
             return data
         else:
             print(f"Playwright Error: {data}")
             if "timeout" in str(data).lower():
-                return self._handle_manual_captcha(url)
+                raise CaptchaDetectedError(url)
             return None
 
     def _handle_manual_captcha(self, url):
@@ -236,6 +267,27 @@ class AbstractFetcher:
         else:
             print(f"\n[!] ヘッドフルモードでエラーが発生しました: {data}")
             raise BotDetectedError(f"Headful browser error: {data}")
+
+    def resolve_captcha_and_fetch(self, url: str, title: str, min_abstract_len: int = 50):
+        """
+        ヘッドフルブラウザでCAPTCHA解除を待ち、解除後の検索結果からAbstractを返す。
+        """
+        result = self._handle_manual_captcha(url)
+        if result:
+            bib = result.get('bib', {})
+            res_title = self._clean_title(bib.get('title', '')).lower()
+            
+            # タイトルの類似性チェック
+            sim_q = self._simplify_for_comparison(title)
+            sim_res = self._simplify_for_comparison(res_title)
+            if sim_q not in sim_res and sim_res not in sim_q:
+                print(f"[CAPTCHA解除後] タイトルが一致しません: {res_title}")
+                return None
+
+            abstract = bib.get('abstract')
+            if abstract and len(abstract) > min_abstract_len:
+                return abstract
+        return None
 
     def fetch_abstract(self, title, source_url=None, year_range=1, min_abstract_len=50):
         """
@@ -281,6 +333,8 @@ class AbstractFetcher:
                     return abstract
             return None
 
+        except CaptchaDetectedError as e:
+            raise e
         except BotDetectedError as e:
             raise e
         except Exception as e:
@@ -289,7 +343,7 @@ class AbstractFetcher:
                 print(f"CRITICAL: Google Scholar Bot Detection detected! ({error_msg})")
                 if self.use_playwright:
                     url = f"https://scholar.google.co.jp/scholar?as_ylo={year_low}&q={query}"
-                    return self._handle_manual_captcha(url)
+                    raise CaptchaDetectedError(url)
                 raise BotDetectedError(f"Google Scholar block detected: {error_msg}")
 
             print(f"Fetch Error: {e}")

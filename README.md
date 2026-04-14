@@ -21,6 +21,7 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
 *   **Duplicate Prevention**: Papers that have already been processed (either notified or deemed irrelevant) are recorded and will not be processed again.
 *   **Fail-safe and Automatic Intervention**: Includes logic to avoid Google Scholar bot detection. If blocked, it automatically displays a browser for the user to manually solve the CAPTCHA and continue.
 *   **Session Persistence**: Saves and reuses the solved CAPTCHA state to project directory, ensuring fewer interruptions and smoother operation.
+*   **Internationalization (i18n)**: Supports switching between Japanese and English for the interface and notification messages.
 
 ## Requirements
 
@@ -66,7 +67,8 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
         "interval_after_notfound_sec": 20,
         "pending_item_expire_days": 30,
         "min_abstract_length": 50,
-        "scholar_search_year_range": 1
+        "scholar_search_year_range": 1,
+        "language": "en"
     }
     ```
 
@@ -90,6 +92,7 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
     | `pending_item_expire_days` | Days before a pending article is auto-discarded and marked as processed. | `30` |
     | `min_abstract_length` | Minimum abstract length (characters) required to attempt analysis. | `50` |
     | `scholar_search_year_range` | Number of years to look back in Google Scholar search. | `1` |
+    | `language` | Display language (`ja` or `en`). | `en` |
 
 ## Usage
 
@@ -131,6 +134,8 @@ Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once
 *   `gemini_analyzer.py`: Module to determine relevance using the Gemini API and generate summaries.
 *   `history_manager.py`: Module to manage processing history and pending data (SQLite).
 *   `notifier.py`: Module to send rich notifications to a Discord Webhook.
+*   `i18n.py`: Module to control system internationalization (multilingual display).
+*   `locales/`: Directory to store translation data (JSON format).
 *   `check_db.py` / `fix_db.py`: (Optional) Maintenance scripts to verify and fix database inconsistencies.
 *   `run_checker.bat`: Batch file for execution.
 *   `config.json`: (User-created/Auto-generated) Configuration file for API keys and keywords.

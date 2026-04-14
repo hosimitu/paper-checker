@@ -46,6 +46,7 @@ def build():
     run_command(
         f"pyinstaller --noconfirm --onedir --name ronbun_checker "
         f"--add-data \"playwright_browsers;playwright_browsers\" "
+        f"--add-data \"locales;locales\" "
         f"--runtime-hook playwright_fix_hook.py "
         f"--collect-all playwright "
         f"--collect-all playwright_stealth "
@@ -57,6 +58,7 @@ def build():
     # 設定エディタは、本体フォルダに移動しやすくするため --onefile (単一ファイル) でビルドします
     run_command(
         f"pyinstaller --noconfirm --onefile --name config_editor "
+        f"--add-data \"locales;locales\" "
         f"--noconsole config_editor.py",
         "設定エディタ(config_editor.py)をビルド中"
     )
