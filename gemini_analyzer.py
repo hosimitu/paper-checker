@@ -21,10 +21,14 @@ class GeminiAnalysisError(Exception):
     pass
 
 class GeminiAnalyzer:
-    def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite-preview", language="ja"):
-        self.client = genai.Client(api_key=api_key)
+    def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite-preview", fallback_model_id=None, language="ja"):
+        self.client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=60000) # 60秒でタイムアウト
+        )
         self.keywords = keywords
         self.model_id = model_id
+        self.fallback_model_id = fallback_model_id
         self.i18n = I18n(language)
 
     def analyze_entry(self, entry):
@@ -55,11 +59,24 @@ Abstract: {entry['summary']}
 [Output Format]
 Output JSON only. Do not include any explanation outside the JSON.
 """
-        max_retries = 3
+        max_retries = 4
         for attempt in range(max_retries):
+            # シーケンス: メイン(0) -> 待機 -> メイン(1) -> 代替(2) -> 待機 -> 代替(3)
+            current_model = self.model_id
+            if attempt >= 2 and self.fallback_model_id:
+                current_model = self.fallback_model_id
+
             try:
+                if attempt >= 2 and self.fallback_model_id:
+                    # フォールバックが発生していることを通知（1回のみ）
+                    if attempt == 2:
+                        print(self.i18n.t("main.fallback_triggered", model=current_model, attempt=attempt+1, max=max_retries))
+
+                if attempt == 0:
+                    print(self.i18n.t("gemini.gemini_analyzing"))
+
                 response = self.client.models.generate_content(
-                    model=self.model_id,
+                    model=current_model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json"
@@ -81,12 +98,22 @@ Output JSON only. Do not include any explanation outside the JSON.
                 )
             except Exception as e:
                 error_msg = str(e)
-                # 503エラー (UNAVAILABLE) かどうかチェック
+                # 503エラー (UNAVAILABLE) または タイムアウト (408/DeadlineExceeded) かどうかチェック
                 is_unavailable = "503" in error_msg or "UNAVAILABLE" in error_msg
+                is_timeout = "408" in error_msg or "DeadlineExceeded" in error_msg or "timeout" in error_msg.lower()
 
-                if is_unavailable and attempt < max_retries - 1:
+                if (is_unavailable or is_timeout) and attempt < max_retries - 1:
+                    # ユーザー指定シーケンス: メイン(2度目)失敗時は待機せず代替へ
+                    if attempt == 1 and self.fallback_model_id:
+                        print(self.i18n.t("gemini.error_fallback_immediate", attempt=attempt+1, max=max_retries))
+                        continue
+
+                    # 通常の待機（1回目失敗後と3回目失敗後）
+                    # attempt=0 -> 5s, attempt=2 -> 10s
                     wait_time = (attempt + 1) * 5
-                    print(f"Gemini API 503 UNAVAILABLE! {wait_time}秒後にリトライします... (Attempt {attempt+1}/{max_retries})")
+                    if attempt == 2: wait_time = 10 # ユーザー指定に合わせる
+
+                    print(self.i18n.t("gemini.error_retry", wait=wait_time, attempt=attempt+1, max=max_retries))
                     time.sleep(wait_time)
                     continue
 

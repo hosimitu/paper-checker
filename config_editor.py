@@ -111,29 +111,37 @@ class ConfigEditor:
         self.ui_labels['desc_model'] = ttk.Label(main_frame, text="", font=("", 12), foreground="gray")
         self.ui_labels['desc_model'].grid(row=3, column=1, sticky=tk.W, pady=(0, 5))
 
+        # Gemini Fallback Model
+        self.ui_labels['fallback_model'] = ttk.Label(main_frame, text="")
+        self.ui_labels['fallback_model'].grid(row=4, column=0, sticky=tk.W, pady=(5, 0))
+        self.gemini_fallback_var = tk.StringVar(value=self.config_data.get('gemini_fallback_model', ''))
+        ttk.Entry(main_frame, textvariable=self.gemini_fallback_var, width=60).grid(row=4, column=1, sticky=tk.W, pady=(5, 0))
+        self.ui_labels['desc_fallback_model'] = ttk.Label(main_frame, text="", font=("", 12), foreground="gray")
+        self.ui_labels['desc_fallback_model'].grid(row=5, column=1, sticky=tk.W, pady=(0, 5))
+
         # Discord Webhook URL
         self.ui_labels['discord_url'] = ttk.Label(main_frame, text="")
-        self.ui_labels['discord_url'].grid(row=4, column=0, sticky=tk.W, pady=5)
+        self.ui_labels['discord_url'].grid(row=6, column=0, sticky=tk.W, pady=5)
         self.discord_url_var = tk.StringVar(value=self.config_data.get('discord_webhook_url', ''))
-        ttk.Entry(main_frame, textvariable=self.discord_url_var, width=65).grid(row=4, column=1, sticky=tk.W, pady=5)
+        ttk.Entry(main_frame, textvariable=self.discord_url_var, width=65).grid(row=6, column=1, sticky=tk.W, pady=5)
 
         # Keywords
         self.ui_labels['keywords'] = ttk.Label(main_frame, text="")
-        self.ui_labels['keywords'].grid(row=5, column=0, sticky=tk.NW, pady=5)
+        self.ui_labels['keywords'].grid(row=7, column=0, sticky=tk.NW, pady=5)
         self.keywords_text = scrolledtext.ScrolledText(main_frame, width=65, height=5, font=("", 14))
-        self.keywords_text.grid(row=5, column=1, sticky=tk.W, pady=5)
+        self.keywords_text.grid(row=7, column=1, sticky=tk.W, pady=5)
         self.keywords_text.insert(tk.END, "\n".join(self.config_data.get('keywords', [])))
 
         # RSS URLs
         self.ui_labels['rss_urls'] = ttk.Label(main_frame, text="")
-        self.ui_labels['rss_urls'].grid(row=6, column=0, sticky=tk.NW, pady=5)
+        self.ui_labels['rss_urls'].grid(row=8, column=0, sticky=tk.NW, pady=5)
         self.rss_text = scrolledtext.ScrolledText(main_frame, width=65, height=8, wrap=tk.NONE, font=("", 14))
-        self.rss_text.grid(row=6, column=1, sticky=tk.W, pady=5)
+        self.rss_text.grid(row=8, column=1, sticky=tk.W, pady=5)
         self.rss_text.insert(tk.END, "\n".join(self.config_data.get('rss_urls', [])))
 
         # Numeric Settings
         self.settings_frame = ttk.LabelFrame(main_frame, text="", padding="15")
-        self.settings_frame.grid(row=7, column=0, columnspan=2, sticky=tk.EW, pady=15)
+        self.settings_frame.grid(row=9, column=0, columnspan=2, sticky=tk.EW, pady=15)
 
         # max_analysis_success_count
         self.ui_labels['max_gemini'] = ttk.Label(self.settings_frame, text="")
@@ -190,7 +198,7 @@ class ConfigEditor:
 
         # Buttons
         btn_frame = ttk.Frame(main_frame)
-        btn_frame.grid(row=8, column=0, columnspan=2, pady=20)
+        btn_frame.grid(row=10, column=0, columnspan=2, pady=20)
 
         self.ui_labels['save_btn'] = ttk.Button(btn_frame, text="", command=self.save_config)
         self.ui_labels['save_btn'].pack(side=tk.LEFT, padx=10)
@@ -208,6 +216,8 @@ class ConfigEditor:
         self.ui_labels['discord_url'].config(text=t("config_editor.discord_url"))
         self.ui_labels['gemini_model'].config(text=t("config_editor.gemini_model"))
         self.ui_labels['desc_model'].config(text=t("config_editor.desc_model"))
+        self.ui_labels['fallback_model'].config(text=t("config_editor.fallback_model"))
+        self.ui_labels['desc_fallback_model'].config(text=t("config_editor.desc_fallback_model"))
         self.ui_labels['keywords'].config(text=t("config_editor.keywords"))
         self.ui_labels['rss_urls'].config(text=t("config_editor.rss_urls"))
         self.settings_frame.config(text=t("config_editor.advanced_settings"))
@@ -256,6 +266,7 @@ class ConfigEditor:
         new_config['language'] = self.lang_var.get()
         new_config['gemini_api_key'] = self.gemini_key_var.get().strip()
         new_config['gemini_model'] = self.gemini_model_var.get().strip()
+        new_config['gemini_fallback_model'] = self.gemini_fallback_var.get().strip()
         new_config['discord_webhook_url'] = self.discord_url_var.get().strip()
 
         keywords = self.keywords_text.get(1.0, tk.END).strip().split('\n')

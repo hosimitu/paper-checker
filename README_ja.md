@@ -54,6 +54,7 @@
         "discord_webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
         "gemini_api_key": "YOUR_GEMINI_API_KEY",
         "gemini_model": "gemini-3.1-flash-lite-preview",
+        "gemini_fallback_model": "",
         "keywords": ["membrane", "CO2 separation"],
         "rss_urls": ["RSS URL for the journal"],
 
@@ -78,7 +79,8 @@
     | ----------------------------- | -------------------------------------------------------------------- | ------------------------------- |
     | `discord_webhook_url`         | 通知を送信する Discord Webhook URL                                   | -                               |
     | `gemini_api_key`              | Google Gemini API のキー                                             | -                               |
-    | `gemini_model`                | 使用する Gemini モデル ID                                            | `gemini-3.1-flash-lite-preview` |
+    | `gemini_model`                | メインで使用する Gemini モデル ID                                    | `gemini-3.1-flash-lite-preview` |
+    | `gemini_fallback_model`       | メインが使えない場合に切り替える代替モデル ID                        | -                               |
     | `keywords`                    | 関連性を判定するためのキーワードリスト                               | -                               |
     | `rss_urls`                    | 購読する RSS フィードの URL リスト                                   | -                               |
     | `max_analysis_success_count`  | 1回の実行で解析（通知）を成功させる最大件数                          | `5`                             |

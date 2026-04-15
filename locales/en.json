@@ -10,7 +10,7 @@
     "scholar_no_resp": "\nCRITICAL: No response from Google Scholar (likely waiting for CAPTCHA)\nInterrupting process for today for safety.",
     "abs_success": "Abstract fetch success: {title}",
     "gemini_limit": "\n!!!! {error} !!!!\nGemini quota limit reached. Interrupting process for today.",
-    "gemini_unavailable_stop": "\n!!!! Gemini unavailable for 3 consecutive papers !!!!\nThere might be a service outage on Gemini's side. Interrupting process for today.",
+    "gemini_unavailable_stop": "\n!!!! Gemini unavailable for 4 consecutive attempts !!!!\nThere might be a service outage on Gemini's side. Interrupting process for today.",
     "relevant": "Relevant! Notifying.",
     "not_relevant": "Not relevant.",
     "not_registered": "Not yet registered in Google Scholar: {title}",
@@ -20,7 +20,8 @@
     "db_abstract_reuse": "Using existing abstract from database: {title}",
     "gemini_unavailable_continue": "Temporary error. Skipping analysis for this article until next run (saving fetched abstract).",
     "bot_error": "\n!!!! {error} !!!!",
-    "gemini_not_found": "\n!!!! {error} !!!!\nGemini model not found. Please check your configuration. Interrupting analysis."
+    "gemini_not_found": "\n!!!! {error} !!!!\nGemini model not found. Please check your configuration. Interrupting analysis.",
+    "fallback_triggered": "\n!!!! Switching model and retrying due to failure: {model} (Attempt {attempt}/{max}) !!!!"
   },
   "config_editor": {
     "title": "Paper-checker Config Editor",
@@ -28,8 +29,10 @@
     "discord_url": "Discord Webhook URL:",
     "keywords": "Keywords (1 per line):",
     "rss_urls": "RSS Feed URLs (1 per line):",
-    "gemini_model": "Gemini Model ID:",
-    "desc_model": "Gemini model ID to use (e.g., gemini-3.1-flash-lite-preview, gemini-2.0-flash, gemini-1.5-flash, etc.)",
+    "gemini_model": "Primary Gemini Model ID:",
+    "desc_model": "Primary Gemini model ID (e.g., gemini-3.1-flash-lite-preview)",
+    "fallback_model": "Fallback Gemini Model ID:",
+    "desc_fallback_model": "Model ID to automatically switch to if primary fails (e.g., gemma-4-31b-it). Leave empty to disable fallback.",
     "advanced_settings": "Advanced Settings",
     "max_gemini": "Max Gemini Analysis Executions:",
     "max_scholar": "Max Paper Search Attempts:",
@@ -70,6 +73,9 @@
     "default_reason": "No reason provided",
     "error_analyze": "Error during Gemini analysis: {error}",
     "error_reason": "Analysis error: {error}",
-    "error_not_found": "Gemini model not found: {error}"
+    "error_not_found": "Gemini model not found: {error}",
+    "gemini_analyzing": "Analyzing with Gemini...",
+    "error_retry": "Gemini API Temporary Error (503 or Timeout)! Retrying in {wait}s... (Attempt {attempt}/{max})",
+    "error_fallback_immediate": "Gemini API Temporary Error (503 or Timeout)! Switching to fallback model immediately... (Attempt {attempt}/{max})"
   }
 }

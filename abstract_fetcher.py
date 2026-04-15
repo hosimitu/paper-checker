@@ -217,7 +217,8 @@ class AbstractFetcher:
 
     def _fetch_abstract_with_playwright(self, query, year_low):
         """別スレッドでPlaywrightを起動してGoogle Scholarから情報を取得する"""
-        url = f"https://scholar.google.co.jp/scholar?as_ylo={year_low}&q={query}&hl=ja&as_sdt=0,5"
+        # グローバル版 (.com) かつ 英語設定 (hl=en) を使用してランキングの精度を上げる
+        url = f"https://scholar.google.com/scholar?as_ylo={year_low}&q={query}&hl=en&as_sdt=0,5"
         result_queue = queue_module.Queue()
 
         t = threading.Thread(target=_run_playwright_headless, args=(url, self.data_dir, result_queue))
@@ -281,7 +282,9 @@ class AbstractFetcher:
             sim_q = self._simplify_for_comparison(title)
             sim_res = self._simplify_for_comparison(res_title)
             if sim_q not in sim_res and sim_res not in sim_q:
-                print(f"[CAPTCHA解除後] タイトルが一致しません: {res_title}")
+                print(f"[CAPTCHA解除後] タイトルが一致しません。")
+                print(f"  - 期待: {title}")
+                print(f"  - 取得: {res_title}")
                 return None
 
             abstract = bib.get('abstract')
@@ -325,7 +328,9 @@ class AbstractFetcher:
                 sim_clean_title = self._simplify_for_comparison(clean_title)
                 sim_res_title = self._simplify_for_comparison(res_title)
                 if sim_clean_title not in sim_res_title and sim_res_title not in sim_clean_title:
-                    print(f"タイトルが一致しません: {res_title}")
+                    print(f"タイトルが一致しません。")
+                    print(f"  - 期待: {clean_title}")
+                    print(f"  - 取得: {res_title}")
                     return None
 
                 abstract = bib.get('abstract')
@@ -342,7 +347,7 @@ class AbstractFetcher:
             if "429" in error_msg or "MaxTries" in error_msg or "Too Many Requests" in error_msg:
                 print(f"CRITICAL: Google Scholar Bot Detection detected! ({error_msg})")
                 if self.use_playwright:
-                    url = f"https://scholar.google.co.jp/scholar?as_ylo={year_low}&q={query}"
+                    url = f"https://scholar.google.com/scholar?as_ylo={year_low}&q={query}"
                     raise CaptchaDetectedError(url)
                 raise BotDetectedError(f"Google Scholar block detected: {error_msg}")
 

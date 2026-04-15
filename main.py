@@ -74,6 +74,7 @@ def main():
         config['gemini_api_key'],
         config['keywords'],
         model_id=config.get('gemini_model', 'gemini-3.1-flash-lite-preview'),
+        fallback_model_id=config.get('gemini_fallback_model'),
         language=language
     )
     notifier = Notifier(config['discord_webhook_url'], language=language)

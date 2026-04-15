@@ -54,6 +54,7 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
         "discord_webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
         "gemini_api_key": "YOUR_GEMINI_API_KEY",
         "gemini_model": "gemini-3.1-flash-lite-preview",
+        "gemini_fallback_model": "",
         "keywords": ["membrane", "CO2 separation"],
         "rss_urls": ["RSS URL for the journal"],
 
@@ -78,7 +79,8 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
     |---|---|---|
     | `discord_webhook_url` | Discord Webhook URL for notifications. | - |
     | `gemini_api_key` | Google Gemini API Key. | - |
-    | `gemini_model` | ID of the Gemini model to use. | `gemini-3.1-flash-lite-preview` |
+    | `gemini_model` | Primary Gemini model ID. | `gemini-3.1-flash-lite-preview` |
+    | `gemini_fallback_model` | Fallback Gemini model ID if primary fails. | - |
     | `keywords` | List of keywords to determine relevance. | - |
     | `rss_urls` | List of RSS feed URLs to subscribe to. | - |
     | `max_analysis_success_count` | Max number of successful analyses (notifications) per execution. | `5` |
