@@ -148,3 +148,8 @@ Windowsの「タスク スケジューラ」などを利用して、`run_checker
 *   一度キャプチャを解除すれば、設定したディレクトリ（デフォルト `.playwright_data`）にセッション情報が保存され、次回以降のキャプチャ要求が抑制されます。
 *   `config.json`, `history.db`, `.env` などの機密情報やローカルデータは自動的にGitの管理から除外 (`.gitignore` 参照) されます。
 *   既存の `history.json` や `pending.json` がある場合、初回実行時に自動的に `history.db` への移行が行われ、元のファイルは `.bak` としてバックアップされます。
+
+## ライセンス
+
+このプロジェクトは [MIT License](LICENSE) の下でライセンスされています。
+使用しているサードパーティ製ライブラリのライセンスについては、 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) を参照してください。

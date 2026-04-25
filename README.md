@@ -148,3 +148,8 @@ Use Windows "Task Scheduler" to run `run_checker.bat` periodically, such as once
 *   Once a CAPTCHA is solved, the session information is saved in the specified directory (default: `.playwright_data`) to prevent frequent CAPTCHA requests in future runs.
 *   Sensitive information and local data such as `config.json`, `history.db`, and `.env` are automatically excluded from Git tracking (refer to `.gitignore`).
 *   If existing `history.json` or `pending.json` files are present, they will be automatically migrated to `history.db` on the first run, and the original files will be renamed to `.bak` as a backup.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+For third-party library licenses, please refer to [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
