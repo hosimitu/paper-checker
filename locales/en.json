@@ -3,7 +3,7 @@
     "starting": "Ronbun Checker (Delayed Evaluation Mode) Starting...",
     "rss_check": "Step 1: Checking for new articles from RSS feeds...",
     "no_pending": "No pending articles (waiting for abstract) at the moment.",
-    "pending_count": "Step 2: Attempting to fetch abstracts for {count} pending articles...",
+    "pending_count": "Step 2: Attempting Gemini analysis for {count} pending articles...",
     "limit_reached": "Analysis success limit ({limit} articles) reached. Remaining will be processed next time.",
     "tried_limit": "Attempt limit ({limit} articles) reached. Ending access for today to protect Google Scholar.",
     "processing": "-- Processing Progress (Attempt:{tried}/{max_tried}, Success:{processed}/{max_processed}): {title} --",
@@ -57,13 +57,19 @@
     "wait_on_exit": "Wait for Enter key on exit:",
     "desc_wait_on_exit": "If OFF, the window will close immediately after finishing.",
     "random_max": "Max Random Wait (sec):",
-    "desc_random_max": "Maximum random seconds to add to each request interval (0 to this value)."
+    "desc_random_max": "Maximum random seconds to add to each request interval (0 to this value).",
+    "semantic_scholar_key": "Semantic Scholar API Key:",
+    "desc_semantic_scholar_key": "Semantic Scholar API key (optional). Setting this reduces accesses to Google Scholar.",
+    "semantic_scholar_interval": "Semantic Scholar Request Interval (sec):",
+    "desc_semantic_scholar_interval": "Interval between Semantic Scholar API requests (cannot be set below 1 second).",
+    "semantic_scholar_max": "Semantic Scholar Max Attempts:",
+    "desc_semantic_scholar_max": "Maximum number of Semantic Scholar API calls per run."
   },
   "notifier": {
     "reason_label": "🧐 Decision Reason",
     "abstract_label": "📝 Abstract Summary",
     "abstract_cont_label": "📝 Abstract Summary (Continued)",
-    "content_msg": "📢 **New relevant paper found**",
+    "content_msg": "📢 **New relevant paper: {title}**",
     "notify_success": "Notification sent: {title}",
     "notify_error": "Failed to send notification: {error}"
   },
@@ -77,5 +83,14 @@
     "gemini_analyzing": "Analyzing with Gemini...",
     "error_retry": "Gemini API Temporary Error (503 or Timeout)! Retrying in {wait}s... (Attempt {attempt}/{max})",
     "error_fallback_immediate": "Gemini API Temporary Error (503 or Timeout)! Switching to fallback model immediately... (Attempt {attempt}/{max})"
+  },
+  "prefetch": {
+    "starting": "Semantic Scholar Pre-fetch Mode Starting...",
+    "no_pending": "No pending articles without abstracts at the moment.",
+    "start": "Step 1.5: Attempting to pre-fetch abstracts for {count} missing entries using Semantic Scholar...",
+    "limit_reached": "Semantic Scholar API request limit ({limit}) reached. Ending process for today.",
+    "success": "[Semantic Scholar] Abstract fetched successfully: {title}",
+    "fallback": "[Semantic Scholar] Not found (kept for Google Scholar fallback): {title}",
+    "done": "Pre-fetching completed (success: {count})."
   }
 }

@@ -3,7 +3,7 @@
     "starting": "Ronbun Checker (Delayed Evaluation Mode) 起動中...",
     "rss_check": "Step 1: RSSフィードから新着記事をチェック中...",
     "no_pending": "現在、保留中（Abstract待ち）の記事はありません。",
-    "pending_count": "Step 2: 保留中の {count} 件についてAbstractの取得を試みます...",
+    "pending_count": "Step 2: 保留中の {count} 件についてGemini解析を試みます...",
     "limit_reached": "解析成功上限({limit}件)に達しました。残りは次回に回します。",
     "tried_limit": "試行上限({limit}件)に達しました。Google Scholar保護のため本日のアクセスを終了します。",
     "processing": "-- 処理中の進捗 (試行:{tried}/{max_tried}, 成功:{processed}/{max_processed}): {title} --",
@@ -57,13 +57,19 @@
     "wait_on_exit": "EXE終了時にキー入力待ちをする:",
     "desc_wait_on_exit": "OFFにすると処理完了後すぐに画面が閉じます。",
     "random_max": "ランダム待機(最大秒):",
-    "desc_random_max": "各問い合わせの待機時間にランダムに加算される最大秒数です（0〜この値）。"
+    "desc_random_max": "各問い合わせの待機時間にランダムに加算される最大秒数です（0〜この値）。",
+    "semantic_scholar_key": "Semantic Scholar API Key:",
+    "desc_semantic_scholar_key": "Semantic Scholar APIキー（省略可能）。設定するとGoogle Scholarへのアクセスを削減できます。",
+    "semantic_scholar_interval": "Semantic Scholar 問い合わせ間隔(秒):",
+    "desc_semantic_scholar_interval": "Semantic Scholar APIのリクエスト間隔（1秒未満には設定不可）。",
+    "semantic_scholar_max": "Semantic Scholar 最大試行数:",
+    "desc_semantic_scholar_max": "1実行あたりのSemantic Scholar APIの最大呼び出し回数。"
   },
   "notifier": {
     "reason_label": "🧐 判定理由",
     "abstract_label": "📝 日本語要旨 (Abstract)",
     "abstract_cont_label": "📝 日本語要旨 (続き)",
-    "content_msg": "📢 **新しい関連論文が見つかりました**",
+    "content_msg": "📢 **新しい関連論文: {title}**",
     "notify_success": "通知を送信しました: {title}",
     "notify_error": "通知の送信に失敗しました: {error}"
   },
@@ -77,5 +83,14 @@
     "gemini_analyzing": "Geminiで解析中...",
     "error_retry": "Gemini API Temporary Error (503 or Timeout)! {wait}秒後にリトライします... (Attempt {attempt}/{max})",
     "error_fallback_immediate": "Gemini API Temporary Error (503 or Timeout)! 待機なしで代替モデルへ移行します... (Attempt {attempt}/{max})"
+  },
+  "prefetch": {
+    "starting": "Semantic Scholar 事前取得（Pre-fetch）モード 起動中...",
+    "no_pending": "現在、Abstract未取得の保留記事はありません。",
+    "start": "Step 1.5: {count}件の未取得のAbstractについて、Semantic Scholarで一括事前取得を試みます...",
+    "limit_reached": "Semantic Scholar APIの要求上限({limit}件)に達しました。本日の処理を終了します。",
+    "success": "[Semantic Scholar] Abstract取得成功: {title}",
+    "fallback": "[Semantic Scholar] 未取得（Google Scholar検索待ちのまま維持）: {title}",
+    "done": "事前取得処理が完了しました（成功: {count}件）。"
   }
 }

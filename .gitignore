@@ -46,19 +46,19 @@ dist/
 # Playwrightブラウザ本体
 playwright_browsers/
 
+# Temp and Notes
+memo.md
+.python-version
+.history/
+build_log.txt
 # Python extras
 .pytest_cache/
 .coverage
 htmlcov/
 .mypy_cache/
 .tox/
-.python-version
 
 # Temporary files
 *.tmp
 *~
 *.swp
-memo.md
-.python-version
-.history/
-build_log.txt

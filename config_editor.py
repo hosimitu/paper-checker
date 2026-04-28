@@ -56,6 +56,9 @@ class ConfigEditor:
         init_wait_exit = "ON" if self.config_data.get('wait_on_exit', True) else "OFF"
         self.wait_on_exit_var = tk.StringVar(value=init_wait_exit)
         self.random_max_var = tk.StringVar(value=str(self.config_data.get('interval_random_max_sec', 9)))
+        self.ss_api_key_var = tk.StringVar(value=self.config_data.get('semantic_scholar_api_key', ''))
+        self.ss_interval_var = tk.StringVar(value=str(self.config_data.get('semantic_scholar_interval_sec', 1.5)))
+        self.ss_max_var = tk.StringVar(value=str(self.config_data.get('semantic_scholar_max_attempts', 20)))
 
         # スクロール可能なメインエリアの作成
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
@@ -119,29 +122,36 @@ class ConfigEditor:
         self.ui_labels['desc_fallback_model'] = ttk.Label(main_frame, text="", font=("", 12), foreground="gray")
         self.ui_labels['desc_fallback_model'].grid(row=5, column=1, sticky=tk.W, pady=(0, 5))
 
-        # Discord Webhook URL
-        self.ui_labels['discord_url'] = ttk.Label(main_frame, text="")
-        self.ui_labels['discord_url'].grid(row=6, column=0, sticky=tk.W, pady=5)
-        self.discord_url_var = tk.StringVar(value=self.config_data.get('discord_webhook_url', ''))
-        ttk.Entry(main_frame, textvariable=self.discord_url_var, width=65).grid(row=6, column=1, sticky=tk.W, pady=5)
+        # Semantic Scholar API Key
+        self.ui_labels['semantic_scholar_key'] = ttk.Label(main_frame, text="")
+        self.ui_labels['semantic_scholar_key'].grid(row=6, column=0, sticky=tk.W, pady=(5, 0))
+        ttk.Entry(main_frame, textvariable=self.ss_api_key_var, width=60, show="*").grid(row=6, column=1, sticky=tk.W, pady=(5, 0))
+        self.ui_labels['desc_semantic_scholar_key'] = ttk.Label(main_frame, text="", font=("", 12), foreground="gray")
+        self.ui_labels['desc_semantic_scholar_key'].grid(row=7, column=1, sticky=tk.W, pady=(0, 5))
 
-        # Keywords
+        # Discord Webhook URL (shifted row)
+        self.ui_labels['discord_url'] = ttk.Label(main_frame, text="")
+        self.ui_labels['discord_url'].grid(row=8, column=0, sticky=tk.W, pady=5)
+        self.discord_url_var = tk.StringVar(value=self.config_data.get('discord_webhook_url', ''))
+        ttk.Entry(main_frame, textvariable=self.discord_url_var, width=65).grid(row=8, column=1, sticky=tk.W, pady=5)
+
+        # Keywords (shifted row)
         self.ui_labels['keywords'] = ttk.Label(main_frame, text="")
-        self.ui_labels['keywords'].grid(row=7, column=0, sticky=tk.NW, pady=5)
+        self.ui_labels['keywords'].grid(row=9, column=0, sticky=tk.NW, pady=5)
         self.keywords_text = scrolledtext.ScrolledText(main_frame, width=65, height=5, font=("", 14))
-        self.keywords_text.grid(row=7, column=1, sticky=tk.W, pady=5)
+        self.keywords_text.grid(row=9, column=1, sticky=tk.W, pady=5)
         self.keywords_text.insert(tk.END, "\n".join(self.config_data.get('keywords', [])))
 
-        # RSS URLs
+        # RSS URLs (shifted row)
         self.ui_labels['rss_urls'] = ttk.Label(main_frame, text="")
-        self.ui_labels['rss_urls'].grid(row=8, column=0, sticky=tk.NW, pady=5)
+        self.ui_labels['rss_urls'].grid(row=10, column=0, sticky=tk.NW, pady=5)
         self.rss_text = scrolledtext.ScrolledText(main_frame, width=65, height=8, wrap=tk.NONE, font=("", 14))
-        self.rss_text.grid(row=8, column=1, sticky=tk.W, pady=5)
+        self.rss_text.grid(row=10, column=1, sticky=tk.W, pady=5)
         self.rss_text.insert(tk.END, "\n".join(self.config_data.get('rss_urls', [])))
 
-        # Numeric Settings
+        # Numeric Settings (shifted row)
         self.settings_frame = ttk.LabelFrame(main_frame, text="", padding="15")
-        self.settings_frame.grid(row=9, column=0, columnspan=2, sticky=tk.EW, pady=15)
+        self.settings_frame.grid(row=11, column=0, columnspan=2, sticky=tk.EW, pady=15)
 
         # max_analysis_success_count
         self.ui_labels['max_gemini'] = ttk.Label(self.settings_frame, text="")
@@ -196,9 +206,23 @@ class ConfigEditor:
         self.ui_labels['desc_random_max'] = ttk.Label(self.settings_frame, text="", font=("", 12), foreground="gray")
         self.ui_labels['desc_random_max'].grid(row=7, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
 
+        # semantic_scholar_interval_sec
+        self.ui_labels['semantic_scholar_interval'] = ttk.Label(self.settings_frame, text="")
+        self.ui_labels['semantic_scholar_interval'].grid(row=8, column=0, sticky=tk.W)
+        ttk.Entry(self.settings_frame, textvariable=self.ss_interval_var, width=10).grid(row=8, column=1, sticky=tk.W, padx=5)
+        self.ui_labels['desc_semantic_scholar_interval'] = ttk.Label(self.settings_frame, text="", font=("", 12), foreground="gray")
+        self.ui_labels['desc_semantic_scholar_interval'].grid(row=9, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
+
+        # semantic_scholar_max_attempts
+        self.ui_labels['semantic_scholar_max'] = ttk.Label(self.settings_frame, text="")
+        self.ui_labels['semantic_scholar_max'].grid(row=8, column=2, sticky=tk.W, padx=10)
+        ttk.Entry(self.settings_frame, textvariable=self.ss_max_var, width=10).grid(row=8, column=3, sticky=tk.W, padx=5)
+        self.ui_labels['desc_semantic_scholar_max'] = ttk.Label(self.settings_frame, text="", font=("", 12), foreground="gray")
+        self.ui_labels['desc_semantic_scholar_max'].grid(row=9, column=2, columnspan=2, sticky=tk.W, padx=10, pady=(0, 10))
+
         # Buttons
         btn_frame = ttk.Frame(main_frame)
-        btn_frame.grid(row=10, column=0, columnspan=2, pady=20)
+        btn_frame.grid(row=12, column=0, columnspan=2, pady=20)
 
         self.ui_labels['save_btn'] = ttk.Button(btn_frame, text="", command=self.save_config)
         self.ui_labels['save_btn'].pack(side=tk.LEFT, padx=10)
@@ -235,6 +259,12 @@ class ConfigEditor:
         self.ui_labels['desc_wait_on_exit'].config(text=t("config_editor.desc_wait_on_exit"))
         self.ui_labels['random_max'].config(text=t("config_editor.random_max"))
         self.ui_labels['desc_random_max'].config(text=t("config_editor.desc_random_max"))
+        self.ui_labels['semantic_scholar_key'].config(text=t("config_editor.semantic_scholar_key"))
+        self.ui_labels['desc_semantic_scholar_key'].config(text=t("config_editor.desc_semantic_scholar_key"))
+        self.ui_labels['semantic_scholar_interval'].config(text=t("config_editor.semantic_scholar_interval"))
+        self.ui_labels['desc_semantic_scholar_interval'].config(text=t("config_editor.desc_semantic_scholar_interval"))
+        self.ui_labels['semantic_scholar_max'].config(text=t("config_editor.semantic_scholar_max"))
+        self.ui_labels['desc_semantic_scholar_max'].config(text=t("config_editor.desc_semantic_scholar_max"))
         self.ui_labels['save_btn'].config(text=t("config_editor.save"))
         self.ui_labels['cancel_btn'].config(text=t("config_editor.cancel"))
 
@@ -281,6 +311,9 @@ class ConfigEditor:
             new_config['scholar_search_year_range']   = int(self.scholar_years_var.get())
             new_config['manual_captcha_timeout_sec']  = int(self.captcha_timeout_var.get())
             new_config['interval_random_max_sec']     = int(self.random_max_var.get())
+            new_config['semantic_scholar_api_key']    = self.ss_api_key_var.get().strip()
+            new_config['semantic_scholar_interval_sec'] = float(self.ss_interval_var.get())
+            new_config['semantic_scholar_max_attempts'] = int(self.ss_max_var.get())
             new_config['use_playwright'] = (self.use_playwright_var.get() == "ON")
             new_config['wait_on_exit']   = (self.wait_on_exit_var.get() == "ON")
         except ValueError:

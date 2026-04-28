@@ -63,15 +63,28 @@ def build():
         "設定エディタ(config_editor.py)をビルド中"
     )
 
+    # 4.5. PyInstaller ビルド (semantic_prefetch.py)
+    run_command(
+        f"pyinstaller --noconfirm --onefile --name semantic_prefetch "
+        f"--add-data \"locales;locales\" "
+        f"--console semantic_prefetch.py",
+        "事前取得ツール(semantic_prefetch.py)をビルド中"
+    )
+
     # 5. 成果物の整理
     print("\n--- 配布用フォルダの整理中 ---")
     final_output = os.path.join(dist_dir, "ronbun_checker")
     # --onefile の場合、exeは dist 直下に生成される
     editor_exe = os.path.join(dist_dir, "config_editor.exe")
+    prefetch_exe = os.path.join(dist_dir, "semantic_prefetch.exe")
     
     if os.path.exists(editor_exe):
         shutil.copy(editor_exe, final_output)
         print(f"config_editor.exe を {final_output} にコピーしました。")
+
+    if os.path.exists(prefetch_exe):
+        shutil.copy(prefetch_exe, final_output)
+        print(f"semantic_prefetch.exe を {final_output} にコピーしました。")
 
     # playwright_browsers が _internal の中に生成されている場合は、ルートに移動する（hook や .bat の想定に合わせる）
     internal_pw_browsers = os.path.join(final_output, "_internal", "playwright_browsers")
@@ -85,6 +98,7 @@ def build():
     print(f"配布用フォルダ: {final_output}")
     print("  - ronbun_checker.exe: 論文チェック本体（直接ダブルクリックで起動可能）")
     print("  - config_editor.exe: 設定ツール")
+    print("  - semantic_prefetch.exe: Semantic Scholar API を用いたAbstract事前取得用ツール（タスクスケジューラ用）")
     print("このフォルダをZIPにして配布してください。")
     print("="*60)
 

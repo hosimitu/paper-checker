@@ -108,6 +108,11 @@ def main():
         min_abstract_length         = config.get('min_abstract_length', 50)
         scholar_search_year_range   = config.get('scholar_search_year_range', 1)
 
+        # =====================================================================
+        # Step 2: Gemini解析 (Abstractがまだない場合はGoogle Scholarで検索)
+        # =====================================================================
+        print(i18n.t("main.pending_count", count=len(pending_entries)))
+
         processed_count = 0
         tried_count = 0
         consecutive_unavailable_count = 0
@@ -138,11 +143,11 @@ def main():
                 history_mgr.mark_completed(entry['link'], title="[Invalid Title]", is_relevant=False, reason="Title missing")
                 continue
 
-            # 既にDBに要旨があるかチェック
+            # 既にDBに要旨があるかチェック（事前取得で入ったものも含む）
             abstract = entry.get('abstract')
 
             if not abstract:
-                # Google Scholar検索（タイムアウト付き）
+                # --- Step 2-B: Google Scholar（タイムアウト付き） ---
                 def fetch_with_timeout():
                     nonlocal abstract
                     try:

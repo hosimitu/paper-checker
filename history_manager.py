@@ -112,6 +112,15 @@ class HistoryManager:
             """, (title, abstract, is_relevant, reason, jp_abstract, now_iso, entry_link))
             conn.commit()
 
+    def update_abstract(self, entry_link, abstract):
+        """事前取得などでAbstractのみを更新する。ステータスや追加日時は変更しない"""
+        with self._get_connection() as conn:
+            conn.execute(
+                "UPDATE articles SET abstract = ? WHERE link = ?",
+                (abstract, entry_link)
+            )
+            conn.commit()
+
     def move_to_end(self, entry_link, abstract=None):
         """キューの最後に回す。要旨が提供された場合は保存する。"""
         now_iso = datetime.now().isoformat()

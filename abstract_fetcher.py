@@ -8,6 +8,29 @@ import queue as queue_module
 from scholarly import scholarly
 from playwright_stealth import Stealth
 
+
+# ---------------------------------------------------------------------------
+# モジュールレベルのユーティリティ関数
+# SemanticScholarFetcherなど他のモジュールからも import して再利用可能
+# ---------------------------------------------------------------------------
+
+def clean_title(title: str) -> str:
+    """タイトルから HTMLタグを除去し、Unicode正規化を行う"""
+    if not title:
+        return ""
+    # 簡易正規表現でHTMLタグを除去
+    title = re.sub(r'<[^>]+>', '', title)
+    # Unicode正規化 (NFKC: 特殊記号や全角半角を統合)
+    title = unicodedata.normalize('NFKC', title)
+    # 連続する空白を1つにまとめ、前後の空白を消去
+    title = re.sub(r'\s+', ' ', title).strip()
+    return title
+
+
+def simplify_for_comparison(title: str) -> str:
+    """比較のためにタイトルを簡略化する（記号、空白を除去し小文字化）"""
+    return re.sub(r'[^a-zA-Z0-9]', '', title).lower()
+
 class BotDetectedError(Exception):
     """Google ScholarのBot検知（ブロック）を検知した際の例外"""
     pass
@@ -200,20 +223,12 @@ class AbstractFetcher:
         self.data_dir = os.path.abspath(data_dir_name)
 
     def _clean_title(self, title):
-        """タイトルから HTMLタグを除去し、Unicode正規化を行う"""
-        if not title:
-            return ""
-        # BeautifulSoup等を使わず、簡易的な正規表現でタグ（<...状況...>）を除去
-        title = re.sub(r'<[^>]+>', '', title)
-        # Unicode正規化 (NFKC: 特殊記号や全角半角を統合)
-        title = unicodedata.normalize('NFKC', title)
-        # 連続する空白を1つにまとめ、前後の空白を消去
-        title = re.sub(r'\s+', ' ', title).strip()
-        return title
+        """タイトルのクリーン処理（モジュール関数に委譲）"""
+        return clean_title(title)
 
     def _simplify_for_comparison(self, title):
-        """比較のためにタイトルを簡略化する（記号、空白を除去）"""
-        return re.sub(r'[^a-zA-Z0-9]', '', title).lower()
+        """タイトルの比較用簡略化（モジュール関数に委譲）"""
+        return simplify_for_comparison(title)
 
     def _fetch_abstract_with_playwright(self, query, year_low):
         """別スレッドでPlaywrightを起動してGoogle Scholarから情報を取得する"""

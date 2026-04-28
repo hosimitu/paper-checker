@@ -11,7 +11,7 @@ class Notifier:
         reason_label       = self.i18n.t("notifier.reason_label")
         abstract_label     = self.i18n.t("notifier.abstract_label")
         abstract_cont_label = self.i18n.t("notifier.abstract_cont_label")
-        content_msg        = self.i18n.t("notifier.content_msg")
+        content_msg        = self.i18n.t("notifier.content_msg", title=entry['title'])
 
         # DiscordのEmbeds（埋め込み）形式を使用して、文字数制限(6000字)を回避しつつ見栄えを良くする
         embed = {
