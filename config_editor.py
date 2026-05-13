@@ -109,7 +109,7 @@ class ConfigEditor:
         # Gemini Model
         self.ui_labels['gemini_model'] = ttk.Label(main_frame, text="")
         self.ui_labels['gemini_model'].grid(row=2, column=0, sticky=tk.W, pady=(5, 0))
-        self.gemini_model_var = tk.StringVar(value=self.config_data.get('gemini_model', 'gemini-3.1-flash-lite-preview'))
+        self.gemini_model_var = tk.StringVar(value=self.config_data.get('gemini_model', 'gemini-3.1-flash-lite'))
         ttk.Entry(main_frame, textvariable=self.gemini_model_var, width=60).grid(row=2, column=1, sticky=tk.W, pady=(5, 0))
         self.ui_labels['desc_model'] = ttk.Label(main_frame, text="", font=("", 12), foreground="gray")
         self.ui_labels['desc_model'].grid(row=3, column=1, sticky=tk.W, pady=(0, 5))
