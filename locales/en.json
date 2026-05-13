@@ -30,7 +30,7 @@
     "keywords": "Keywords (1 per line):",
     "rss_urls": "RSS Feed URLs (1 per line):",
     "gemini_model": "Primary Gemini Model ID:",
-    "desc_model": "Primary Gemini model ID (e.g., gemini-3.1-flash-lite-preview)",
+    "desc_model": "Primary Gemini model ID (e.g., gemini-3.1-flash-lite)",
     "fallback_model": "Fallback Gemini Model ID:",
     "desc_fallback_model": "Model ID to automatically switch to if primary fails (e.g., gemma-4-31b-it). Leave empty to disable fallback.",
     "advanced_settings": "Advanced Settings",

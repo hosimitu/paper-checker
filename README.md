@@ -52,7 +52,7 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
     {
         "discord_webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
         "gemini_api_key": "YOUR_GEMINI_API_KEY",
-        "gemini_model": "gemini-3.1-flash-lite-preview",
+        "gemini_model": "gemini-3.1-flash-lite",
         "gemini_fallback_model": "gemma-4-26b-a4b-it",
         "keywords": ["membrane", "CO2 separation"],
         "rss_urls": ["RSS URL for the journal"],
@@ -78,30 +78,30 @@ Only papers deemed highly relevant are notified via a Discord Webhook.
 
     Details of each item:
 
-    | Item Name | Description | Default Value |
-    |---|---|---|
-    | `discord_webhook_url` | Discord Webhook URL for notifications. | - |
-    | `gemini_api_key` | Google Gemini API Key. | - |
-    | `gemini_model` | ID of the Gemini model to use. | `gemini-3.1-flash-lite-preview` |
-    | `gemini_fallback_model` | Fallback model ID to use when Gemini API limit is exceeded or an error occurs. | - |
-    | `keywords` | List of keywords to determine relevance. | - |
-    | `rss_urls` | List of RSS feed URLs to subscribe to. | - |
-    | `max_analysis_success_count` | Max number of successful analyses (notifications) per execution. | `5` |
-    | `max_scholar_access_attempts` | Max attempts to access Google Scholar per execution. | `10` |
-    | `scholar_search_timeout_sec` | Timeout for Google Scholar search response (seconds). | `30` |
-    | `use_playwright` | Enables high-precision fetching and CAPTCHA handling via Playwright. | `true` |
-    | `manual_captcha_timeout_sec` | Maximum time to wait for manual CAPTCHA solving (seconds). | `120` |
-    | `playwright_user_data_dir` | Directory to save browser session information. | `.playwright_data` |
-    | `wait_on_exit` | Whether to wait before closing the console window after execution. | `true` |
-    | `interval_after_success_sec` | Wait time after a successful analysis to avoid bot detection (seconds). | `10` |
-    | `interval_after_notfound_sec` | Wait time when an article is not found in Scholar (seconds). | `20` |
-    | `interval_random_max_sec` | Maximum random seconds to add to the wait time. | `9` |
-    | `pending_item_expire_days` | Days before a pending article is auto-discarded and marked as processed. | `30` |
-    | `min_abstract_length` | Minimum abstract length (characters) required to attempt analysis. | `50` |
-    | `scholar_search_year_range` | Number of years to look back in Google Scholar search. | `1` |
-    | `semantic_scholar_api_key` | Semantic Scholar API Key (works without it but with stricter limits). | - |
-    | `semantic_scholar_interval_sec` | Request interval for Semantic Scholar API in seconds (min 1.0). | `1.5` |
-    | `semantic_scholar_max_attempts` | Max attempts to access Semantic Scholar per execution. | `20` |
+    | Item Name                       | Description                                                                    | Default Value           |
+    | ------------------------------- | ------------------------------------------------------------------------------ | ----------------------- |
+    | `discord_webhook_url`           | Discord Webhook URL for notifications.                                         | -                       |
+    | `gemini_api_key`                | Google Gemini API Key.                                                         | -                       |
+    | `gemini_model`                  | ID of the Gemini model to use.                                                 | `gemini-3.1-flash-lite` |
+    | `gemini_fallback_model`         | Fallback model ID to use when Gemini API limit is exceeded or an error occurs. | -                       |
+    | `keywords`                      | List of keywords to determine relevance.                                       | -                       |
+    | `rss_urls`                      | List of RSS feed URLs to subscribe to.                                         | -                       |
+    | `max_analysis_success_count`    | Max number of successful analyses (notifications) per execution.               | `5`                     |
+    | `max_scholar_access_attempts`   | Max attempts to access Google Scholar per execution.                           | `10`                    |
+    | `scholar_search_timeout_sec`    | Timeout for Google Scholar search response (seconds).                          | `30`                    |
+    | `use_playwright`                | Enables high-precision fetching and CAPTCHA handling via Playwright.           | `true`                  |
+    | `manual_captcha_timeout_sec`    | Maximum time to wait for manual CAPTCHA solving (seconds).                     | `120`                   |
+    | `playwright_user_data_dir`      | Directory to save browser session information.                                 | `.playwright_data`      |
+    | `wait_on_exit`                  | Whether to wait before closing the console window after execution.             | `true`                  |
+    | `interval_after_success_sec`    | Wait time after a successful analysis to avoid bot detection (seconds).        | `10`                    |
+    | `interval_after_notfound_sec`   | Wait time when an article is not found in Scholar (seconds).                   | `20`                    |
+    | `interval_random_max_sec`       | Maximum random seconds to add to the wait time.                                | `9`                     |
+    | `pending_item_expire_days`      | Days before a pending article is auto-discarded and marked as processed.       | `30`                    |
+    | `min_abstract_length`           | Minimum abstract length (characters) required to attempt analysis.             | `50`                    |
+    | `scholar_search_year_range`     | Number of years to look back in Google Scholar search.                         | `1`                     |
+    | `semantic_scholar_api_key`      | Semantic Scholar API Key (works without it but with stricter limits).          | -                       |
+    | `semantic_scholar_interval_sec` | Request interval for Semantic Scholar API in seconds (min 1.0).                | `1.5`                   |
+    | `semantic_scholar_max_attempts` | Max attempts to access Semantic Scholar per execution.                         | `20`                    |
 
 ## Usage
 

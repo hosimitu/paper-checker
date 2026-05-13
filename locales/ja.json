@@ -30,7 +30,7 @@
     "keywords": "キーワード (1行に1つ):",
     "rss_urls": "RSSフィードURL (1行に1つ):",
     "gemini_model": "主 Gemini モデル名:",
-    "desc_model": "メインで使用するモデルID（例: gemini-3.1-flash-lite-preview）",
+    "desc_model": "メインで使用するモデルID（例: gemini-3.1-flash-lite）",
     "fallback_model": "代替 Gemini モデル名:",
     "desc_fallback_model": "メインが負荷等で使えない場合に自動で切り替えるモデル（例: gemma-4-31b-it）。空欄なら切り替えません。",
     "advanced_settings": "詳細設定",

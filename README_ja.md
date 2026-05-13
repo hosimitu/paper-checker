@@ -53,7 +53,7 @@
     {
         "discord_webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
         "gemini_api_key": "YOUR_GEMINI_API_KEY",
-        "gemini_model": "gemini-3.1-flash-lite-preview",
+        "gemini_model": "gemini-3.1-flash-lite",
         "gemini_fallback_model": "gemma-4-26b-a4b-it",
         "keywords": ["membrane", "CO2 separation"],
         "rss_urls": ["RSS URL for the journal"],
@@ -79,30 +79,30 @@
 
     各項目の詳細は以下の通りです。
 
-    | 項目名                        | 説明                                                                 | デフォルト値                    |
-    | ----------------------------- | -------------------------------------------------------------------- | ------------------------------- |
-    | `discord_webhook_url`         | 通知を送信する Discord Webhook URL                                   | -                               |
-    | `gemini_api_key`              | Google Gemini API のキー                                             | -                               |
-    | `gemini_model`                | 使用する Gemini モデル ID                                            | `gemini-3.1-flash-lite-preview` |
-    | `gemini_fallback_model`       | Gemini の制限超過やエラー時に使用するフォールバックモデル ID         | -                               |
-    | `keywords`                    | 関連性を判定するためのキーワードリスト                               | -                               |
-    | `rss_urls`                    | 購読する RSS フィードの URL リスト                                   | -                               |
-    | `max_analysis_success_count`  | 1回の実行で解析（通知）を成功させる最大件数                          | `5`                             |
-    | `max_scholar_access_attempts` | 1回の実行で Google Scholar へアクセスを試みる最大件数                | `10`                            |
-    | `scholar_search_timeout_sec`  | Google Scholar 検索の応答待ちタイムアウト（秒）                      | `30`                            |
-    | `use_playwright`              | Playwright による高精度取得・キャプチャ対応を有効にするか            | `true`                          |
-    | `manual_captcha_timeout_sec`  | キャプチャ解除を待機する最大時間（秒）                               | `120`                           |
-    | `playwright_user_data_dir`    | ブラウザのセッション情報を保存するディレクトリ                       | `.playwright_data`              |
-    | `wait_on_exit`                | 実行終了後にコンソールウィンドウを閉じずに待機するか                 | `true`                          |
-    | `interval_after_success_sec`  | 1件解析が成功した後の待機時間。Bot検知回避用                         | `10`                            |
-    | `interval_after_notfound_sec` | Scholarに登録されていなかった場合の待機時間                          | `20`                            |
-    | `interval_random_max_sec`     | 待機時間に追加するランダムな時間の最大値（秒）                       | `9`                             |
-    | `pending_item_expire_days`    | 記事が保留されてから自動破棄（未処理として処理済みへ）するまでの日数 | `30`                            |
-    | `min_abstract_length`         | 解析を試みる最低限の要旨(Abstract)文字数                             | `50`                            |
-    | `scholar_search_year_range`   | Scholar検索で対象とする「現在から遡る年数」                          | `1`                             |
-    | `semantic_scholar_api_key`    | Semantic Scholar API キー（空文字でも動作可能）                      | -                               |
-    | `semantic_scholar_interval_sec` | Semantic Scholar API へのリクエスト間隔（秒）。最低1.0秒           | `1.5`                           |
-    | `semantic_scholar_max_attempts` | 1回の実行で Semantic Scholar へアクセスする最大件数                | `20`                            |
+    | 項目名                          | 説明                                                                 | デフォルト値            |
+    | ------------------------------- | -------------------------------------------------------------------- | ----------------------- |
+    | `discord_webhook_url`           | 通知を送信する Discord Webhook URL                                   | -                       |
+    | `gemini_api_key`                | Google Gemini API のキー                                             | -                       |
+    | `gemini_model`                  | 使用する Gemini モデル ID                                            | `gemini-3.1-flash-lite` |
+    | `gemini_fallback_model`         | Gemini の制限超過やエラー時に使用するフォールバックモデル ID         | -                       |
+    | `keywords`                      | 関連性を判定するためのキーワードリスト                               | -                       |
+    | `rss_urls`                      | 購読する RSS フィードの URL リスト                                   | -                       |
+    | `max_analysis_success_count`    | 1回の実行で解析（通知）を成功させる最大件数                          | `5`                     |
+    | `max_scholar_access_attempts`   | 1回の実行で Google Scholar へアクセスを試みる最大件数                | `10`                    |
+    | `scholar_search_timeout_sec`    | Google Scholar 検索の応答待ちタイムアウト（秒）                      | `30`                    |
+    | `use_playwright`                | Playwright による高精度取得・キャプチャ対応を有効にするか            | `true`                  |
+    | `manual_captcha_timeout_sec`    | キャプチャ解除を待機する最大時間（秒）                               | `120`                   |
+    | `playwright_user_data_dir`      | ブラウザのセッション情報を保存するディレクトリ                       | `.playwright_data`      |
+    | `wait_on_exit`                  | 実行終了後にコンソールウィンドウを閉じずに待機するか                 | `true`                  |
+    | `interval_after_success_sec`    | 1件解析が成功した後の待機時間。Bot検知回避用                         | `10`                    |
+    | `interval_after_notfound_sec`   | Scholarに登録されていなかった場合の待機時間                          | `20`                    |
+    | `interval_random_max_sec`       | 待機時間に追加するランダムな時間の最大値（秒）                       | `9`                     |
+    | `pending_item_expire_days`      | 記事が保留されてから自動破棄（未処理として処理済みへ）するまでの日数 | `30`                    |
+    | `min_abstract_length`           | 解析を試みる最低限の要旨(Abstract)文字数                             | `50`                    |
+    | `scholar_search_year_range`     | Scholar検索で対象とする「現在から遡る年数」                          | `1`                     |
+    | `semantic_scholar_api_key`      | Semantic Scholar API キー（空文字でも動作可能）                      | -                       |
+    | `semantic_scholar_interval_sec` | Semantic Scholar API へのリクエスト間隔（秒）。最低1.0秒             | `1.5`                   |
+    | `semantic_scholar_max_attempts` | 1回の実行で Semantic Scholar へアクセスする最大件数                  | `20`                    |
 
 ## 使い方
 

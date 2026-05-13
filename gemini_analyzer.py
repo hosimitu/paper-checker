@@ -21,7 +21,7 @@ class GeminiAnalysisError(Exception):
     pass
 
 class GeminiAnalyzer:
-    def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite-preview", fallback_model_id=None, language="ja"):
+    def __init__(self, api_key, keywords, model_id="gemini-3.1-flash-lite", fallback_model_id=None, language="ja"):
         self.client = genai.Client(
             api_key=api_key,
             http_options=types.HttpOptions(timeout=60000) # 60秒でタイムアウト

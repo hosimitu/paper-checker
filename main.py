@@ -73,7 +73,7 @@ def main():
     analyzer = GeminiAnalyzer(
         config['gemini_api_key'],
         config['keywords'],
-        model_id=config.get('gemini_model', 'gemini-3.1-flash-lite-preview'),
+        model_id=config.get('gemini_model', 'gemini-3.1-flash-lite'),
         fallback_model_id=config.get('gemini_fallback_model'),
         language=language
     )
